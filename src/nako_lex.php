@@ -10,24 +10,6 @@ function nako3lex($src, $line = 1, $filename = '') {
   while ($src != '') {
     $hasRule = false;
     foreach ($nako3lex_rules as $rule) {
-      // 文字列でマッチ？ - 微力な高速化
-      if (isset($rule['s'])) {
-        $s = $rule['s'];
-        if ($s == substr($src, 0, strlen($s))) {
-          $token = ['name' => $rule['name'], 'value' => $s];
-          $hasRule = true;
-          // 特殊パーサーを使う？
-          if (isset($rule['parser'])) {
-            $rule['parser']($src, $token, $rule);
-            $tokens[] = $token;
-            break;
-          }
-          $tokens[] = $token;
-          $src = substr($src, strlen($s));
-          break;
-        }
-        continue; // 文字列の一致なし
-      }
       // 正規表現でマッチ
       if (!preg_match($rule['re'], $src, $m)) { continue; }
       $ms = $m[0];
@@ -39,8 +21,8 @@ function nako3lex($src, $line = 1, $filename = '') {
       }
       $token = ['name' => $rule['name'], 'value' => $ms];
       // parserを使う？
-      if (isset($rule['cbParser'])) {
-        $rule['cbParser']($src, $token, $rule);
+      if (isset($rule['parser'])) {
+        $rule['parser']($src, $token, $rule);
         $tokens[] = $token;
         break;
       }
