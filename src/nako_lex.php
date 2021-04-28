@@ -23,18 +23,15 @@ function nako3lex($src, $line = 1, $filename = '') {
       // parserを使う？
       if (isset($rule['parser'])) {
         $rule['parser']($src, $token, $rule);
+        nako3lex_josi($src, $token, $rule);
         $tokens[] = $token;
         break;
       }
       // トークンを追加
-      $tokens[] = $token;
       $src = substr($src, strlen($ms));
+      nako3lex_josi($src, $token, $rule);
+      $tokens[] = $token;
       break;
-      // todo
-      if (isset($rule['josi']) && $rule['josi']) {
-        //todo: read josi
-      }
-      throw new Exception('字句解析のシステムエラー');
     }
     if (!$hasRule) {
       $ch = mb_substr($src, 0, 1);
@@ -42,6 +39,16 @@ function nako3lex($src, $line = 1, $filename = '') {
     }
   }
   return $tokens;
+}
+
+function nako3lex_josi(&$src, &$token, $rule) {
+  global $nako3josi;
+  if (!isset($rule['josi'])) return;
+  if (preg_match($nako3josi['re'], $src, $m)) {
+    $josi = $m[0];
+    $src = substr($src, strlen($josi));
+    $token['josi'] = $josi;
+  }
 }
 
 function nako3lex_str($src) {
@@ -52,5 +59,17 @@ function nako3lex_str($src) {
   }
   return implode(',', $res);
 }
+
+function nako3lex_desc($src) {
+  $tokens = nako3lex($src);
+  $res = [];
+  foreach ($tokens as $t) {
+    $t['value'] = isset($t['value']) ? $t['value'] : '';
+    $t['josi'] = isset($t['josi']) ? $t['josi'] : '';
+    $res[] = $t['name'].':'.$t['value'].':'.$t['josi'];
+  }
+  return implode(',', $res);
+}
+
 
 
