@@ -10,4 +10,5 @@ test_eq(nako3lex_str("123「abc」"), 'number,string_ex', 'number+string_ex');
 test_eq(nako3lex_str("123'abc'"), 'number,string', 'number+string');
 test_eq(nako3lex_str("123が"), 'number', 'number+josi');
 test_eq(nako3lex_desc("123が"), 'number:123:が', 'number+josi');
+test_eq(nako3lex_desc("/*abc*/"), 'range_comment:abc:', 'range_comment');
 

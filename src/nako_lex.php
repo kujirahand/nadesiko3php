@@ -20,9 +20,11 @@ function nako3lex($src, $line = 1, $filename = '') {
         break;
       }
       $token = ['name' => $rule['name'], 'value' => $ms];
+      // eos なら行番号を変更
+      if ($rule['name'] == 'eos') { $line++; }
       // parserを使う？
       if (isset($rule['parser'])) {
-        $rule['parser']($src, $token, $rule);
+        $rule['parser']($src, $token, $rule, $line);
         nako3lex_josi($src, $token, $rule);
         $tokens[] = $token;
         break;
