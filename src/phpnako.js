@@ -2,18 +2,12 @@
 /**
  * コマンドライン版のなでしこ3
  */
-const fetch = require('node-fetch')
-if (typeof globalThis !== 'undefined' && typeof globalThis.fetch === 'undefined') {
-  globalThis.fetch = fetch
-} else
-if (typeof global !== 'undefined' && typeof global.fetch === 'undefined') {
-  global.fetch = fetch
-}
 
 // global
 const fs = require('fs')
 const exec = require('child_process').exec
 const path = require('path')
+const fetch = require('node-fetch')
 // nadesiko3
 const NakoCompiler = require('nadesiko3/src/nako3')
 const { NakoImportError } = require('nadesiko3/src/nako_errors')
@@ -41,7 +35,7 @@ class PHPNako extends NakoCompiler {
 
     // commanderを使って引数を解析する
     app
-      .title('日本語プログラミング言語「なでしこ」v' + nako_version.version)
+      .title('日本語プログラミング言語「なでしこ」v' + nako_version.version + '(PHP)')
       .version(nako_version.version, '-v, --version')
       .usage('[オプション] 入力ファイル.nako3')
       .option('-w, --warn', '警告を表示する')
@@ -171,17 +165,34 @@ class PHPNako extends NakoCompiler {
     // system
     src = '!"PHP"をモード設定\n' + src
     const jscode = this.compileStandalone(src, this.filename, isTest)
-    if (opt.debug) {
-
-    }
-    console.log(opt.output)
+    // console.log(opt.output)
     fs.writeFileSync(opt.output, jscode, 'utf-8')
+    // プラグインPHPがあるかチェック
+    this.copyRuntime(this.filename)
     if (opt.run)
       {exec(`php ${opt.output}`, function (err, stdout, stderr) {
         if (err) {console.log('[ERROR]', stderr)}
         console.log(stdout)
       })}
 
+  }
+  /**
+   * ランタイムのコピー
+   */
+  copyRuntime(targetFile) {
+    const targetDir = path.dirname(path.resolve(targetFile))
+    const targetSrcDir = path.join(targetDir, 'src')
+    const srcDir = path.join(path.resolve(__dirname))
+    if (targetSrcDir == srcDir) {return}
+    // copy
+    if (!fs.existsSync(targetSrcDir)) {fs.mkdirSync(targetSrcDir)}
+    const files = fs.readdirSync(srcDir)
+    for (const name of files) {
+      if (!name.match(/^plugin_.*\.php$/)) {continue}
+      const src = path.join(srcDir, name)
+      const dst = path.join(targetSrcDir, name)
+      fs.copyFileSync(src, dst)
+    }
   }
 
   // ワンライナーの場合

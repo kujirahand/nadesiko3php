@@ -1,9 +1,13 @@
 <?php
+
+// USAGE
 if (count($argv) < 2) {
-  echo "convert_js2php (jsfile)\n";
+  echo "[USAGE] convert_js2php (jsfile)\n";
+  echo "なでしこのプラグインファイルからPHPのひな形を生成します。";
   exit;
 }
 conv($argv[1]);
+
 
 function conv($infile) {
   $body = file_get_contents($infile);

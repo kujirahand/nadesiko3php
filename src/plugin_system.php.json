@@ -158,6 +158,17 @@
         "fn": {},
         "return_none": true
     },
+    "継続表示": {
+        "type": "func",
+        "josi": [
+            [
+                "を",
+                "と"
+            ]
+        ],
+        "fn": {},
+        "return_none": true
+    },
     "表示ログ": {
         "type": "const",
         "value": ""

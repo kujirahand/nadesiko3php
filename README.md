@@ -3,7 +3,8 @@
 日本語プログラミング言語「なでしこ」をPHPで動かすプロジェクト。
 サーバーでの利用を想定。
 
-- [なでしこ3](https://github.com/kujirahand/nadesiko3)
+- [本家「なでしこ3」のリポジトリ](https://github.com/kujirahand/nadesiko3)
+- [「なでしこ3」のWEB](https://nadesi.com/)
 
 ## インストール方法
 

@@ -4,7 +4,8 @@
   "description": "Japanese Programming Language \"Nadesiko3\" with PHP ",
   "main": "phpnako.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha",
+    "phppnako": "bin/phpnako"
   },
   "repository": {
     "type": "git",
@@ -24,6 +25,7 @@
   },
   "homepage": "https://github.com/kujirahand/nadesiko3php#readme",
   "dependencies": {
-    "nadesiko3": "^3.2.22"
+    "nadesiko3": "^3.2.22",
+    "node-fetch": "^2.6.1"
   }
 }
