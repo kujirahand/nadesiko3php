@@ -1,0 +1,29 @@
+{
+  "name": "nadesiko3php",
+  "version": "0.0.1",
+  "description": "Japanese Programming Language \"Nadesiko3\" with PHP ",
+  "main": "phpnako.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kujirahand/nadesiko3php.git"
+  },
+  "keywords": [
+    "PHP",
+    "altPHP",
+    "Nadesiko3",
+    "Script",
+    "Program"
+  ],
+  "author": "kujirahand <web@kujirahand.com> (https://kujirahand.com/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kujirahand/nadesiko3php/issues"
+  },
+  "homepage": "https://github.com/kujirahand/nadesiko3php#readme",
+  "dependencies": {
+    "nadesiko3": "^3.2.22"
+  }
+}
