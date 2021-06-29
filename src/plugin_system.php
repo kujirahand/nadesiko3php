@@ -70,7 +70,18 @@ $exports = [
     'type' => 'func',
     'josi' => [['を', 'と']],
     'fn' => function($s, $sys) {
-      echo $s."\n";
+      global $__v0;
+      if (is_string($s)) {
+        $s .= "\n";
+      }
+      else if (is_array($s)) {
+        $s = trim(json_encode($s, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT))."\n";
+      }
+      else {
+        $s .= "\n";
+      }
+      echo $s;
+      $__v0['表示ログ'] .= $s;
     },
     'return_none' => true,
   ],
@@ -581,77 +592,88 @@ $exports = [
     'type' => 'func',
     'josi' => [['を', 'の'], ['で']],
     'fn' => function($v, $cnt) {
-      throw new Exception('未実装のメソッドです');
+      $r = '';
+      for ($i = 0; $i < $cnt; $i++) {
+        $r .= $v;
+      }
+      return $r;
     },
   ],
   '出現回数'=> [ // @文字列SにAが何回出現するか数える // @しゅつげんかいすう
     'type' => 'func',
     'josi' => [['で'], ['の']],
     'fn' => function($s, $a) {
-      throw new Exception('未実装のメソッドです');
+      return mb_substr_count($s, $a);
     },
   ],
   'MID'=> [ // @文字列SのA文字目からCNT文字を抽出する // @MID
     'type' => 'func',
     'josi' => [['で', 'の'], ['から'], ['を']],
     'fn' => function($s, $a, $cnt) {
-      throw new Exception('未実装のメソッドです');
+      return mb_substr($s, $a - 1, $cnt);
     },
   ],
   '文字抜出'=> [ // @文字列SのA文字目からCNT文字を抽出する // @もじぬきだす
     'type' => 'func',
     'josi' => [['で', 'の'], ['から'], ['を', '']],
     'fn' => function($s, $a, $cnt) {
-      throw new Exception('未実装のメソッドです');
+      return mb_substr($s, $a - 1, $cnt);
     },
   ],
   'LEFT'=> [ // @文字列Sの左端からCNT文字を抽出する // @LEFT
     'type' => 'func',
     'josi' => [['の', 'で'], ['だけ']],
     'fn' => function($s, $cnt) {
-      throw new Exception('未実装のメソッドです');
+      return mb_substr($s, 0, $cnt);
     },
   ],
   '文字左部分'=> [ // @文字列Sの左端からCNT文字を抽出する // @もじひだりぶぶん
     'type' => 'func',
     'josi' => [['の', 'で'], ['だけ', '']],
     'fn' => function($s, $cnt) {
-      throw new Exception('未実装のメソッドです');
+      return mb_substr($s, 0, $cnt);
     },
   ],
   'RIGHT'=> [ // @文字列Sの右端からCNT文字を抽出する // @RIGHT
     'type' => 'func',
     'josi' => [['の', 'で'], ['だけ']],
     'fn' => function($s, $cnt) {
-      throw new Exception('未実装のメソッドです');
+      return mb_substr($s, mb_strlen($s) - $cnt, $cnt);
     },
   ],
   '文字右部分'=> [ // @文字列Sの右端からCNT文字を抽出する // @もじみぎぶぶん
     'type' => 'func',
     'josi' => [['の', 'で'], ['だけ', '']],
     'fn' => function($s, $cnt) {
-      throw new Exception('未実装のメソッドです');
+      return mb_substr($s, mb_strlen($s) - $cnt, $cnt);
     },
   ],
   '区切'=> [ // @文字列Sを区切り文字Aで区切って配列で返す // @くぎる
     'type' => 'func',
     'josi' => [['の', 'を'], ['で']],
     'fn' => function($s, $a) {
-      throw new Exception('未実装のメソッドです');
+      return explode($a, $s);
     },
   ],
   '切取'=> [ // @文字列Sから文字列Aまでの部分を抽出する(v1非互換) // @きりとる
     'type' => 'func',
     'josi' => [['から', 'の'], ['まで', 'を']],
     'fn' => function($s, $a) {
-      throw new Exception('未実装のメソッドです');
+      $i = mb_strpos($s, $a);
+      if ($i === FALSE) {
+        return $s;
+      }
+      $sub = mb_substr($s, 0, $i);
+      return $sub;
     },
   ],
   '文字削除'=> [ // @文字列SのA文字目からB文字分を削除して返す // @もじさくじょ
     'type' => 'func',
     'josi' => [['の'], ['から'], ['だけ', 'を', '']],
     'fn' => function($s, $a, $b) {
-      throw new Exception('未実装のメソッドです');
+      $mae = mb_substr($s, $a - 1);
+      $ato = mb_substr($s, ($a - 1 + $b));
+      return $mae.$ato;
     },
   ],
   // @ 置換・トリム
@@ -659,28 +681,29 @@ $exports = [
     'type' => 'func',
     'josi' => [['の', 'で'], ['を', 'から'], ['に', 'へ']],
     'fn' => function($s, $a, $b) {
-      throw new Exception('未実装のメソッドです');
+      return str_replace($s, $a, $b);
     },
   ],
   '単置換'=> [ // @文字列Sのうち、最初に出現するAだけをBに置換して返す // @たんちかん
     'type' => 'func',
     'josi' => [['の', 'で'], ['を'], ['に', 'へ']],
     'fn' => function($s, $a, $b) {
-      throw new Exception('未実装のメソッドです');
+      $a = str_replace('#', '\#', $a);
+      return preg_replace("#$a#", $b, $s, 1); 
     },
   ],
   'トリム'=> [ // @文字列Sの前後にある空白を削除する // @とりむ
     'type' => 'func',
     'josi' => [['の', 'を']],
     'fn' => function($s) {
-      throw new Exception('未実装のメソッドです');
+      return trim($s);
     },
   ],
   '空白除去'=> [ // @文字列Sの前後にある空白を削除する // @くうはくじょきょ
     'type' => 'func',
     'josi' => [['の', 'を']],
     'fn' => function($s) {
-      throw new Exception('未実装のメソッドです');
+      return trim($s);
     },
   ],
   // @ 文字変換
@@ -688,48 +711,59 @@ $exports = [
     'type' => 'func',
     'josi' => [['の', 'を']],
     'fn' => function($s) {
-      throw new Exception('未実装のメソッドです');
+      return strtoupper($s);
     },
   ],
   '小文字変換'=> [ // @アルファベットの文字列Sを小文字に変換 // @こもじへんかん
     'type' => 'func',
     'josi' => [['の', 'を']],
     'fn' => function($s) {
-      throw new Exception('未実装のメソッドです');
+      return strtolower($s);
     },
   ],
   '平仮名変換'=> [ // @文字列Sのカタカナをひらがなに変換 // @ひらがなへんかん
     'type' => 'func',
     'josi' => [['の', 'を']],
     'fn' => function($s) {
-      throw new Exception('未実装のメソッドです');
+      // https://www.php.net/manual/ja/function.mb-convert-kana.php
+      // c	「全角カタカナ」を「全角ひらがな」に変換します。
+      // H	「半角カタカナ」を「全角ひらがな」に変換します。
+      // V	濁点付きの文字を一文字に変換します。"K", "H" と共に使用します
+      return mb_convert_kana($s, 'cHV');
     },
   ],
   'カタカナ変換'=> [ // @文字列Sのひらがなをカタカナに変換 // @かたかなへんかん
     'type' => 'func',
     'josi' => [['の', 'を']],
     'fn' => function($s) {
-      throw new Exception('未実装のメソッドです');
+      // https://www.php.net/manual/ja/function.mb-convert-kana.php
+      // C : 「全角ひらがな」を「全角カタカナ」に変換
+      return mb_convert_kana($s, 'C');
     },
   ],
   '英数全角変換'=> [ // @文字列Sの半角英数文字を全角に変換 // @えいすうぜんかくへんかん
     'type' => 'func',
     'josi' => [['の', 'を']],
     'fn' => function($s) {
-      throw new Exception('未実装のメソッドです');
+      // https://www.php.net/manual/ja/function.mb-convert-kana.php
+      // A	「半角」英数字を「全角」に変換します
+      return mb_convert_kana($s, 'A');
     },
   ],
   '英数半角変換'=> [ // @文字列Sの全角英数文字を半角に変換 // @えいすうはんかくへんかん
     'type' => 'func',
     'josi' => [['の', 'を']],
     'fn' => function($s) {
-      throw new Exception('未実装のメソッドです');
+      // https://www.php.net/manual/ja/function.mb-convert-kana.php
+      // a	「全角」英数字を「半角」に変換します。
+      return mb_convert_kana($s, 'a');
     },
   ],
   '英数記号全角変換'=> [ // @文字列Sの半角英数記号文字を全角に変換 // @えいすうきごうぜんかくへんかん
     'type' => 'func',
     'josi' => [['の', 'を']],
     'fn' => function($s) {
+      // TODO: 記号の変換関数がPHPにないので後で作る
       throw new Exception('未実装のメソッドです');
     },
   ],
@@ -737,6 +771,7 @@ $exports = [
     'type' => 'func',
     'josi' => [['の', 'を']],
     'fn' => function($s) {
+      // TODO: 記号の変換関数がPHPにないので後で作る
       throw new Exception('未実装のメソッドです');
     },
   ],
@@ -744,62 +779,80 @@ $exports = [
     'type' => 'func',
     'josi' => [['の', 'を']],
     'fn' => function($s, $sys) {
-      throw new Exception('未実装のメソッドです');
+      // https://www.php.net/manual/ja/function.mb-convert-kana.php
+      // K	「半角カタカナ」を「全角カタカナ」に変換します。
+      // V	濁点付きの文字を一文字に変換します。"K", "H" と共に使用します。
+      return mb_convert_kana($s, 'KV');
     },
   ],
   'カタカナ半角変換'=> [ // @文字列Sの全角カタカナを半角に変換 // @かたかなはんかくへんかん
     'type' => 'func',
     'josi' => [['の', 'を']],
     'fn' => function($s, $sys) {
-      throw new Exception('未実装のメソッドです');
+      // https://www.php.net/manual/ja/function.mb-convert-kana.php
+      //k	「全角カタカナ」を「半角カタカナ」に変換します
+      return mb_convert_kana($s, 'k');
     },
   ],
   '全角変換'=> [ // @文字列Sの半角文字を全角に変換 // @ぜんかくへんかん
     'type' => 'func',
     'josi' => [['の', 'を']],
     'fn' => function($s, $sys) {
-      throw new Exception('未実装のメソッドです');
+      // https://www.php.net/manual/ja/function.mb-convert-kana.php
+      // A	「半角」英数字を「全角」に変換します 
+      // S	「半角」スペースを「全角」に変換
+      // K	「半角カタカナ」を「全角カタカナ」に変換
+      // V	濁点付きの文字を一文字に変換
+      return mb_convert_kana($s, 'ASKV');
     },
   ],
   '半角変換'=> [ // @文字列Sの全角文字を半角に変換 // @はんかくへんかん
     'type' => 'func',
     'josi' => [['の', 'を']],
     'fn' => function($s, $sys) {
-      throw new Exception('未実装のメソッドです');
+      // https://www.php.net/manual/ja/function.mb-convert-kana.php
+      // a	「全角」英数字を「半角」に変換します。
+      // s	「全角」スペースを「半角」に変換
+      // k	「全角カタカナ」を「半角カタカナ」に変換
+      return mb_convert_kana($s, 'ask');
     },
   ],
-  '全角カナ一覧'=>['type'=>'const', 'value'=>'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンァィゥェォャュョッ、。ー「」'], // @ぜんかくかないちらん
-  '全角カナ濁音一覧'=>['type'=>'const', 'value'=>'ガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポ'], // @ぜんかくかなだくおんいちらん
-  '半角カナ一覧'=>['type'=>'const', 'value'=>'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜｦﾝｧｨｩｪｫｬｭｮｯ､｡ｰ｢｣ﾞﾟ'], // @はんかくかないちらん
-  '半角カナ濁音一覧'=>['type'=>'const', 'value'=>'ｶﾞｷﾞｸﾞｹﾞｺﾞｻﾞｼﾞｽﾞｾﾞｿﾞﾀﾞﾁﾞﾂﾞﾃﾞﾄﾞﾊﾞﾋﾞﾌﾞﾍﾞﾎﾞﾊﾟﾋﾟﾌﾟﾍﾟﾎﾟ'], // @はんかくかなだくおんいちらん
   // @ JSON
   'JSONエンコード'=> [ // @オブジェクトVをJSON形式にエンコードして返す // @JSONえんこーど
     'type' => 'func',
     'josi' => [['を', 'の']],
     'fn' => function($v) {
-      throw new Exception('未実装のメソッドです');
+      return json_encode($v);
     },
   ],
   'JSONエンコード整形'=> [ // @オブジェクトVをJSON形式にエンコードして整形して返す // @JSONえんこーどせいけい
     'type' => 'func',
     'josi' => [['を', 'の']],
     'fn' => function($v) {
-      throw new Exception('未実装のメソッドです');
+      return json_encode($v, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE);
     },
   ],
   'JSONデコード'=> [ // @JSON文字列Sをオブジェクトにデコードして返す // @JSONでこーど
     'type' => 'func',
     'josi' => [['を', 'の', 'から']],
     'fn' => function($s) {
-      throw new Exception('未実装のメソッドです');
+      return json_decode($s, TRUE);
     },
   ],
   // @ 正規表現
-  '正規表現マッチ'=> [ // @文字列Aを正規表現パターンBでマッチして結果を返す(パターンBは「/pat/opt」の形式で指定。optにgの指定がなければ部分マッチが『抽出文字列』に入る) // @せいきひょうげんまっち
+  '正規表現マッチ'=> [ // @文字列Aを正規表現パターンBでマッチして結果を返す(パターンBは「/pat/opt」の形式で指定。部分マッチが『抽出文字列』に入る) // @せいきひょうげんまっち
     'type' => 'func',
     'josi' => [['を', 'が'], ['で', 'に']],
-    'fn' => function($a, $b, $sys) {
-      throw new Exception('未実装のメソッドです');
+    'fn' => function($a, $b) {
+      global $__v0;
+      if (preg_match($b, $a, $m)) {
+        $__v0['抽出文字列'] = $m;
+        $ret = TRUE;
+      } else {
+        $__v0['抽出文字列'] = '';
+        $ret = FALSE;
+      }
+      return $ret;
     },
   ],
   '抽出文字列'=>['type'=>'const', 'value'=>[]], // @ちゅうしゅつもじれつ
@@ -807,14 +860,14 @@ $exports = [
     'type' => 'func',
     'josi' => [['の'], ['を', 'から'], ['で', 'に', 'へ']],
     'fn' => function($s, $a, $b) {
-      throw new Exception('未実装のメソッドです');
+      return preg_replace($s, $a, $b);
     },
   ],
   '正規表現区切'=> [ // @文字列Sを正規表現パターンAで区切って配列で返す(パターンAは/pat/optで指定) // @せいきひょうげんくぎる
     'type' => 'func',
     'josi' => [['を'], ['で']],
     'fn' => function($s, $a) {
-      throw new Exception('未実装のメソッドです');
+      return preg_split($a, $s);
     },
   ],
   // @ 指定形式
@@ -822,21 +875,21 @@ $exports = [
     'type' => 'func',
     'josi' => [['を', 'の']],
     'fn' => function($v) {
-      throw new Exception('未実装のメソッドです');
+      return number_format($v);
     },
   ],
   'ゼロ埋'=> [ // @数値VをA桁の0で埋める // @ぜろうめ
     'type' => 'func',
     'josi' => [['を'], ['で']],
     'fn' => function($v, $a) {
-      throw new Exception('未実装のメソッドです');
+      return sprintf("%0{$a}d", $v);
     },
   ],
   '空白埋'=> [ // @文字列VをA桁の空白で埋める // @くうはくうめ
     'type' => 'func',
     'josi' => [['を'], ['で']],
     'fn' => function($v, $a) {
-      throw new Exception('未実装のメソッドです');
+      return sprintf("%{$a}d", $v);
     },
   ],
   // @ 文字種類
@@ -844,28 +897,28 @@ $exports = [
     'type' => 'func',
     'josi' => [['を', 'の', 'が']],
     'fn' => function($s) {
-      throw new Exception('未実装のメソッドです');
+      return preg_match("/^[ぁ-ん]$/u", mb_substr($s, 0, 1));
     },
   ],
   'カタカナ判定'=> [ // @文字列Sの1文字目がカタカナか判定 // @かたかなかはんてい
     'type' => 'func',
     'josi' => [['を', 'の', 'が']],
     'fn' => function($s) {
-      throw new Exception('未実装のメソッドです');
+      return preg_match("/^[ァ-ヶー]$/u", mb_substr($s, 0, 1));
     },
   ],
   '数字判定'=> [ // @文字列Sの1文字目が数字か判定 // @すうじかはんてい
     'type' => 'func',
     'josi' => [['を', 'が']],
     'fn' => function($s) {
-      throw new Exception('未実装のメソッドです');
+      return preg_match("/^[0-9]$/", mb_substr($s, 0, 1));
     },
   ],
   '数列判定'=> [ // @文字列S全部が数字か判定 // @すうれつかはんてい
     'type' => 'func',
     'josi' => [['を', 'が']],
     'fn' => function($s) {
-      throw new Exception('未実装のメソッドです');
+      return preg_match("/^[0-9]+$/",$s);
     },
   ],
   // @ 配列操作
@@ -873,219 +926,274 @@ $exports = [
     'type' => 'func',
     'josi' => [['を'], ['で']],
     'fn' => function($a, $s) {
-      throw new Exception('未実装のメソッドです');
+      return implode($s, $a);
     },
   ],
   '配列検索'=> [ // @配列Aから文字列Sを探してインデックス番号(0起点)を返す。見つからなければ-1を返す。 // @はいれつけんさく
     'type' => 'func',
     'josi' => [['の', 'から'], ['を']],
     'fn' => function($a, $s) {
-      throw new Exception('未実装のメソッドです');
+      return array_search($s, $a);
     },
   ],
   '配列要素数'=> [ // @配列Aの要素数を返す // @はいれつようそすう
     'type' => 'func',
     'josi' => [['の']],
     'fn' => function($a) {
-      throw new Exception('未実装のメソッドです');
+      return count($a);
     },
   ],
   '要素数'=> [ // @配列Aの要素数を返す // @ようそすう
     'type' => 'func',
     'josi' => [['の']],
     'fn' => function($a, $sys) {
-      throw new Exception('未実装のメソッドです');
+      return count($a);
     },
   ],
   '配列挿入'=> [ // @配列AのI番目(0起点)に要素Sを追加して返す(v1非互換) // @はいれつそうにゅう
     'type' => 'func',
     'josi' => [['の'], ['に', 'へ'], ['を']],
-    'fn' => function($a, $i, $s) {
-      throw new Exception('未実装のメソッドです');
+    'fn' => function(&$a, $i, $s) {
+      return array_splice($a, $i, 0, $s);
     },
   ],
   '配列一括挿入'=> [ // @配列AのI番目(0起点)に配列bを追加して返す(v1非互換) // @はいれついっかつそうにゅう
     'type' => 'func',
     'josi' => [['の'], ['に', 'へ'], ['を']],
-    'fn' => function($a, $i, $b) {
-      throw new Exception('未実装のメソッドです');
+    'fn' => function(&$a, $i, $b) {
+      return array_splice($a, $i, 0, $s);
     },
   ],
   '配列ソート'=> [ // @配列Aをソートして返す(A自体を変更) // @はいれつそーと
     'type' => 'func',
     'josi' => [['の', 'を']],
-    'fn' => function($a) {
-      throw new Exception('未実装のメソッドです');
+    'fn' => function(&$a) {
+      return sort($a);
     },
   ],
   '配列数値ソート'=> [ // @配列Aをソートして返す(A自体を変更) // @はいれつすうちそーと
     'type' => 'func',
     'josi' => [['の', 'を']],
-    'fn' => function($a) {
-      throw new Exception('未実装のメソッドです');
+    'fn' => function(&$a) {
+      return sort($a, SORT_NUMERIC);
     },
   ],
   '配列カスタムソート'=> [ // @関数Fで配列Aをソートして返す(引数A自体を変更) // @はいれつかすたむそーと
     'type' => 'func',
     'josi' => [['で'], ['の', 'を']],
-    'fn' => function($f, $a, $sys) {
-      throw new Exception('未実装のメソッドです');
+    'fn' => function($f, &$a) {
+      if (is_string($f)) {
+        $f = nako3_findVar($f);
+        if ($f == null) {return FALSE;}
+      }
+      $b = usort($a, $f);
+      return $b;
     },
   ],
   '配列逆順'=> [ // @配列Aを逆にして返す。Aを書き換える(A自体を変更)。 // @はいれつぎゃくじゅん
     'type' => 'func',
     'josi' => [['の', 'を']],
-    'fn' => function($a) {
-      throw new Exception('未実装のメソッドです');
+    'fn' => function(&$a) {
+      return array_reverse($a);
     },
   ],
   '配列シャッフル'=> [ // @配列Aをシャッフルして返す。Aを書き換える // @はいれつしゃっふる
     'type' => 'func',
     'josi' => [['の', 'を']],
-    'fn' => function($a) {
-      throw new Exception('未実装のメソッドです');
+    'fn' => function(&$a) {
+      return shuffle($a);
     },
   ],
   '配列削除'=> [ // @配列AのI番目(0起点)の要素を削除して返す。Aの内容を書き換える。辞書型変数ならキーIを削除する。 // @はいれつさくじょ
     'type' => 'func',
     'josi' => [['の', 'から'], ['を']],
-    'fn' => function($a, $i, $sys) {
-      throw new Exception('未実装のメソッドです');
+    'fn' => function(&$a, $i, $sys) {
+      $a = array_splice($a, $i, 1);
+      if (count($a) == 1) return $a[0];
+      return null;
     },
   ],
   '配列切取'=> [ // @配列AのI番目(0起点)の要素を切り取って返す。Aの内容を書き換える。辞書型変数ならキーIを削除する。 // @はいれつきりとる
     'type' => 'func',
     'josi' => [['の', 'から'], ['を']],
-    'fn' => function($a, $i) {
-      throw new Exception('未実装のメソッドです');
+    'fn' => function(&$a, $i) {
+      $a = array_splice($a, $i, 1);
+      if (count($a) == 1) return $a[0];
+      return null;
     },
   ],
   '配列取出'=> [ // @配列AのI番目(0起点)からCNT個の要素を取り出して返す。Aの内容を書き換える // @はいれつとりだし
     'type' => 'func',
     'josi' => [['の'], ['から'], ['を']],
-    'fn' => function($a, $i, $cnt) {
-      throw new Exception('未実装のメソッドです');
+    'fn' => function(&$a, $i, $cnt) {
+      return array_splice($a, $i, $cnt);
     },
   ],
   '配列ポップ'=> [ // @配列Aの末尾を取り出して返す。Aの内容を書き換える。 // @はいれつぽっぷ
     'type' => 'func',
     'josi' => [['の', 'から']],
-    'fn' => function($a) {
-      throw new Exception('未実装のメソッドです');
+    'fn' => function(&$a) {
+      return array_pop($a);
     },
   ],
   '配列追加'=> [ // @配列Aの末尾にBを追加して返す。Aの内容を書き換える。 // @はいれつついか
     'type' => 'func',
     'josi' => [['に', 'へ'], ['を']],
-    'fn' => function($a, $b) {
-      throw new Exception('未実装のメソッドです');
+    'fn' => function(&$a, $b) {
+      return array_push($a, $b);
     },
   ],
   '配列複製'=> [ // @配列Aを複製して返す。 // @はいれつふくせい
     'type' => 'func',
     'josi' => [['を']],
     'fn' => function($a) {
-      throw new Exception('未実装のメソッドです');
+      $json = json_encode($a);
+      $data = json_decode($json, TRUE);
+      return $data;
     },
   ],
   '配列足'=> [ // @配列Aに配列Bを足し合わせて返す。 // @はいれつたす
     'type' => 'func',
     'josi' => [['に', 'へ', 'と'],['を']],
     'fn' => function($a, $b) {
-      throw new Exception('未実装のメソッドです');
+      return array_merge($a, $b);
     },
   ],
   '配列最大値'=> [ // @配列Aの値の最大値を調べて返す。 // @はいれつさいだいち
     'type' => 'func',
     'josi' => [['の']],
     'fn' => function($a) {
-      throw new Exception('未実装のメソッドです');
+      return max($a);
     },
   ],
   '配列最小値'=> [ // @配列Aの値の最小値を調べて返す。 // @はいれつさいしょうち
     'type' => 'func',
     'josi' => [['の']],
     'fn' => function($a) {
-      throw new Exception('未実装のメソッドです');
+      return min($a);
     },
   ],
   '配列合計'=> [ // @配列Aの値を全て足して返す。配列の各要素を数値に変換して計算する。数値に変換できない文字列は0になる。 // @はいれつごうけい
     'type' => 'func',
     'josi' => [['の']],
     'fn' => function($a) {
-      throw new Exception('未実装のメソッドです');
+      return array_sum($a);
     },
   ],
   // @ 二次元配列処理
   '表ソート'=> [ // @二次元配列AでB列目(0起点)(あるいはキー名)をキーに文字列順にソートする。Aの内容を書き換える。 // @ひょうそーと
     'type' => 'func',
     'josi' => [['の'], ['を']],
-    'fn' => function($a, $no) {
-      throw new Exception('未実装のメソッドです');
+    'fn' => function(&$a, $no) {
+      return sort($a[$no]);
     },
   ],
   // @ 二次元配列処理
   '表数値ソート'=> [ // @二次元配列AでB列目(0起点)(あるいはキー名)をキーに数値順にソートする。Aの内容を書き換える。 // @ひょうすうちそーと
     'type' => 'func',
     'josi' => [['の'], ['を']],
-    'fn' => function($a, $no) {
-      throw new Exception('未実装のメソッドです');
+    'fn' => function(&$a, $no) {
+      return sort($a[$no], SORT_NUMERIC);
     },
   ],
   '表ピックアップ'=> [ // @配列Aの列番号B(0起点)(あるいはキー名)で検索文字列Sを含む行を返す // @ひょうぴっくあっぷ
     'type' => 'func',
     'josi' => [['の'],['から'],['を','で']],
     'fn' => function($a, $no, $s) {
-      throw new Exception('未実装のメソッドです');
+      foreach ($a[$no] as $row) {
+        if (mb_strpos($row, $s) !== FALSE) {return $row;}
+      }
+      return null;
     },
   ],
   '表完全一致ピックアップ'=> [ // @配列Aの列番号B(0起点)(あるいはキー名)で検索文字列Sと一致する行を返す // @ひょうぴっくあっぷ
     'type' => 'func',
     'josi' => [['の'],['から'],['を','で']],
     'fn' => function($a, $no, $s) {
-      throw new Exception('未実装のメソッドです');
+      foreach ($a[$no] as $row) {
+        if ($row == $s) {return $row;}
+      }
+      return null;
     },
   ],
   '表検索'=> [ // @二次元配列AでCOL列目(0起点)からキーSを含む行をROW行目から検索して何行目にあるか返す。見つからなければ-1を返す。 // @ひょうけんさく
     'type' => 'func',
     'josi' => [['の'],['で','に'],['から'],['を']],
     'fn' => function($a, $col, $row, $s) {
-      throw new Exception('未実装のメソッドです');
+      foreach ($a[$no] as $i => $row) {
+        if ($row == $s) {return $i;}
+      }
+      return -1;
     },
   ],
   '表列数'=> [ // @二次元配列Aの列数を調べて返す。 // @ひょうれつすう
     'type' => 'func',
     'josi' => [['の']],
     'fn' => function($a) {
-      throw new Exception('未実装のメソッドです');
+      if (!is_array($a)) {return 0;}
+      $c = 0;
+      foreach ($a as $row) {
+        if (count($row) > $c) {$c = count($row);}
+      }
+      return $c;
     },
   ],
   '表行数'=> [ // @二次元配列Aの行数を調べて返す。 // @ひょうぎょうすう
     'type' => 'func',
     'josi' => [['の']],
     'fn' => function($a) {
-      throw new Exception('未実装のメソッドです');
+      return count($a);
     },
   ],
   '表行列交換'=> [ // @二次元配列Aの行と列を交換して返す。 // @ひょうぎょうれつこうかん
     'type' => 'func',
     'josi' => [['の', 'を']],
     'fn' => function($a, $sys) {
-      throw new Exception('未実装のメソッドです');
+      global $__v0;
+      $cols = $__v0['表列数']($a);
+      $rows = count($a);
+      $res = [];
+      for ($r = 0; $r < $cols; $r++) {
+        $res[] = [];
+        for ($c = 0; $c < $rows; $c++) {
+          $res[$r][$c] = isset($a[$c][$r]) ? $a[$c][$r] : '';
+        } 
+      }
+      return $res;
     },
   ],
   '表右回転'=> [ // @二次元配列Aを90度回転して返す。 // @ひょうみぎかいてん
     'type' => 'func',
     'josi' => [['の', 'を']],
     'fn' => function($a, $sys) {
-      throw new Exception('未実装のメソッドです');
+      global $__v0;
+      $cols = $__v0['表列数']($a);
+      $rows = count($a);
+      $res = [];
+      for ($r = 0; $r < $cols; $r++) {
+        $res[] = [];
+        for ($c = 0; $c < $rows; $c++) {
+          $k = $rows-$c-1;
+          $res[$r][$c] = isset($a[$k][$r]) ? $a[$k][$r] : '';
+        }
+      }
+      return $res;
     },
   ],
   '表重複削除'=> [ // @二次元配列AのI列目にある重複項目を削除して返す。 // @ひょうじゅうふくさくじょ
     'type' => 'func',
     'josi' => [['の'],['を','で']],
     'fn' => function($a, $i, $sys) {
-      throw new Exception('未実装のメソッドです');
+      $res = [];
+      $keys = [];
+      for ($n = 0; $n < count($a); $n++) {
+        $k = $a[$n][$i];
+        if (!isset($keys[$k])) {
+          $keys[$k] = TRUE;
+          $res[] = $a[$n];
+        }
+      }
+      return $res;
     },
   ],
   '表列取得'=> [ // @二次元配列AのI列目を返す。 // @ひょうれつしゅとく
@@ -1353,3 +1461,17 @@ $exports = [
     },
   ],
 ];
+
+// なでしこの変数関数を得る
+function nako3_findVar($name) {
+  global $nako3;
+  $__varslist = $nako3['__varslist'];
+  for ($i = count($__varslist) - 1; $i >= 0; $i--) {
+    $vars = $__varslist[$i];
+    if (isset($vars[$name])) {return $vars[$name];}
+  }
+  return null;
+}
+
+
+

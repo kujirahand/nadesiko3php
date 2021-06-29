@@ -16,6 +16,7 @@ const nako_version = require('nadesiko3/src/nako_version.js')
 // this repository
 const NakoGenPHP = require('./nako_gen_php')
 const PluginSystem = require('./plugin_system.php.json')
+const PluginPHP = require('./plugin_php.php.json')
 
 class PHPNako extends NakoCompiler {
   /** @param {{ nostd?: boolean }} [opts] */
@@ -184,14 +185,20 @@ class PHPNako extends NakoCompiler {
     const targetSrcDir = path.join(targetDir, 'src')
     const srcDir = path.join(path.resolve(__dirname))
     if (targetSrcDir == srcDir) {return}
-    // copy
+    // フォルダ作成
     if (!fs.existsSync(targetSrcDir)) {fs.mkdirSync(targetSrcDir)}
     const files = fs.readdirSync(srcDir)
     for (const name of files) {
       if (!name.match(/^plugin_.*\.php$/)) {continue}
       const src = path.join(srcDir, name)
       const dst = path.join(targetSrcDir, name)
-      fs.copyFileSync(src, dst)
+      fs.copyFileSync(src, dst) // 強制的に上書き
+    }
+    // nako3config.ini.php がある？ (なければ作成)
+    const configFile = path.join(srcDir, 'nako3config.ini.tpl')
+    const targetConfigFile = path.join(targetDir, 'nako3config.ini.php')
+    if (!fs.existsSync(targetConfigFile)) {
+      fs.copyFileSync(configFile, targetConfigFile)
     }
   }
 
