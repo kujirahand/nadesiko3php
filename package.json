@@ -27,5 +27,8 @@
   "dependencies": {
     "nadesiko3": "^3.2.22",
     "node-fetch": "^2.6.1"
+  },
+  "dependencies": {
+    "mocha": "^9.0.1"
   }
 }
