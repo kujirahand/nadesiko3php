@@ -230,7 +230,7 @@ class PHPNako extends NakoCompiler {
     if (!fs.existsSync(tempDir)) {
       fs.mkdirSync(tempDir)
     }
-    opt.filename = path.join(tempDir, 'oneliner.nako3')
+    this.filename = opt.filename = path.join(tempDir, 'oneliner.nako3')
     opt.output = path.join(tempDir, 'oneliner.php')
     opt.run = true
     this.nakoCompile(opt, opt.source, false)
