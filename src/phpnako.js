@@ -9,12 +9,14 @@ const execSync = require('child_process').execSync
 const path = require('path')
 const fetch = require('node-fetch')
 const iconv = require('iconv-lite')
+const chokidar = require('chokidar')
 
 // nadesiko3
 const NakoCompiler = require('nadesiko3/src/nako3')
 const { NakoImportError } = require('nadesiko3/src/nako_errors')
 const app = require('nadesiko3/src/commander_ja.js')
 const nako_version = require('nadesiko3/src/nako_version.js')
+
 // this repository
 const NakoGenPHP = require('./nako_gen_php')
 const PluginSystem = require('./plugin_system.php.json')
@@ -59,6 +61,7 @@ class PHPNako extends NakoCompiler {
       .option('-p, --speed', 'スピード優先モードの指定')
       .option('-A, --ast', 'パースした結果をASTで出力する')
       .option('-r, --dir [dir]', '指定したフォルダにあるファイルを全部変換する')
+      .option('-W, --watch', '作業フォルダのファイルを監視して順次コンパイルする')
       // .option('-h, --help', '使い方を表示する')
       // .option('-v, --version', 'バージョンを表示する')
       .parse(process.argv)
@@ -102,7 +105,8 @@ class PHPNako extends NakoCompiler {
       'browsers': app.browsers || false,
       'speed': app.speed || false,
       'ast': app.ast || false,
-      'dir': app.dir || false
+      'dir': app.dir || false,
+      'watch': app.watch || false
     }
     args.mainfile = app.args[0]
     args.output = app.output
@@ -149,6 +153,10 @@ class PHPNako extends NakoCompiler {
     }
     if (opt.dir) { // フォルダを全部変換する
       this.convertDir(opt)
+      return
+    }
+    if (opt.watch) { // 監視して変換する
+      this.watch(opt)
       return
     }
 
@@ -391,6 +399,24 @@ class PHPNako extends NakoCompiler {
       }
     }
     console.log('ok')
+  }
+
+  /** 監視して変換する */
+  watch () {
+    const conv = (path) => {
+      const cmd = `node "${__dirname}/phpnako.js" -c "${path}"`
+      console.log(`*** conv: ${path}`)
+    }
+    const dir = process.cwd()
+    const ww = chokidar.watch(dir, {
+      ignored: /[\/\\]\./,
+      persistent: true
+    })
+    ww.on('ready', () => {
+      ww.on('add', (path) => conv(path))
+      ww.on('change', (path) => conv(path))
+    })
+    
   }
 }
 
