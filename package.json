@@ -25,10 +25,9 @@
   },
   "homepage": "https://github.com/kujirahand/nadesiko3php#readme",
   "dependencies": {
+    "iconv-lite": "^0.6.3",
+    "mocha": "^9.0.1",
     "nadesiko3": "^3.2.22",
     "node-fetch": "^2.6.1"
-  },
-  "dependencies": {
-    "mocha": "^9.0.1"
   }
 }
