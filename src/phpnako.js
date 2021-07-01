@@ -184,9 +184,12 @@ class PHPNako extends NakoCompiler {
   nakoCompile(opt, src, isTest) {
     // system
     src = '!"PHP"をモード設定\n' + src
-    const jscode = this.compileStandalone(src, this.filename, isTest)
-    // console.log(opt.output)
-    fs.writeFileSync(opt.output, jscode, 'utf-8')
+    try {
+      const jscode = this.compileStandalone(src, this.filename, isTest)
+      fs.writeFileSync(opt.output, jscode, 'utf-8')
+    } catch (e) {
+      console.warn(e.message)
+    }
     // プラグインPHPがあるかチェック
     this.copyRuntime(this.filename)
     if (opt.run) {
@@ -406,9 +409,9 @@ class PHPNako extends NakoCompiler {
   }
 
   /** 監視して変換する */
-  watch () {
+  watch (opt) {
     const conv = (fpath) => {
-      const f = path.dirname(fpath)
+      const f = path.basename(fpath)
       if (!f.match(/\.nako3$/)) { return }
       console.log(`*** conv: ${fpath}`)
       const cmd = `node "${__dirname}/phpnako.js" -c "${fpath}"`
@@ -426,8 +429,9 @@ class PHPNako extends NakoCompiler {
     // 最初に全部変換
     this.convertDir(dir)
     ww.on('ready', () => {
-      ww.on('add', (path) => conv(path))
-      ww.on('change', (path) => conv(path))
+      console.log('*** フォルダを監視します:')
+      ww.on('add', (fpath) => conv(fpath))
+      ww.on('change', (fpath) => conv(fpath))
     })
   }
 }

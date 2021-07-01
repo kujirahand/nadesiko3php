@@ -84,5 +84,8 @@ describe('php_basic_test', () => {
   it('URLパラメータ解析', () => {
     cmp('「https://example.com/?a=1&b=2」のURLパラメータ解析してJSONエンコードして表示。', '{"a":"1","b":"2"}')
   })
+  it('置換', () => {
+    cmp('「a,b,c」の「,」を「-」に置換して表示。', 'a-b-c')
+  })
 })
 

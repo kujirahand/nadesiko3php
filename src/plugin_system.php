@@ -683,7 +683,7 @@ $exports = [
     'type' => 'func',
     'josi' => [['の', 'で'], ['を', 'から'], ['に', 'へ']],
     'fn' => function($s, $a, $b) {
-      return str_replace($s, $a, $b);
+      return str_replace($a, $b, $s);
     },
   ],
   '単置換'=> [ // @文字列Sのうち、最初に出現するAだけをBに置換して返す // @たんちかん
