@@ -130,28 +130,28 @@ $exports = [
     'type' => 'func',
     'josi' => [['が', 'の']],
     'fn' => function($path) {
-      throw new Exception('未実装のメソッドです');
+      return file_exists($path);
     },
   ],
   'フォルダ存在'=> [ // @ディレクトリPATHが存在するか確認して返す // @ふぉるだそんざい
     'type' => 'func',
     'josi' => [['が', 'の']],
     'fn' => function($path) {
-      throw new Exception('未実装のメソッドです');
+      return file_exists($path);
     },
   ],
   'フォルダ作成'=> [ // @ディレクトリPATHを作成して返す(再帰的に作成) // @ふぉるださくせい
     'type' => 'func',
     'josi' => [['の', 'を', 'に', 'へ']],
     'fn' => function($path) {
-      throw new Exception('未実装のメソッドです');
+      mkdir($path);
     },
   ],
   'ファイルコピー'=> [ // @パスAをパスBへファイルコピーする // @ふぁいるこぴー
     'type' => 'func',
     'josi' => [['から', 'を'], ['に', 'へ']],
     'fn' => function($a, $b, $sys) {
-      throw new Exception('未実装のメソッドです');
+      return copy($a, $b);
     },
   ],
   'ファイルコピー時'=> [ // @パスAをパスBへファイルコピーしてcallbackを実行 // @ふぁいるこぴーしたとき
@@ -165,7 +165,7 @@ $exports = [
     'type' => 'func',
     'josi' => [['から', 'を'], ['に', 'へ']],
     'fn' => function($a, $b, $sys) {
-      throw new Exception('未実装のメソッドです');
+      return rename($a, $b);
     },
   ],
   'ファイル移動時'=> [ // @パスAをパスBへ移動してcallbackを実行 // @ふぁいるいどうしたとき
@@ -179,7 +179,7 @@ $exports = [
     'type' => 'func',
     'josi' => [['の', 'を']],
     'fn' => function($path, $sys) {
-      throw new Exception('未実装のメソッドです');
+      return unlink($path);
     },
   ],
   'ファイル削除時'=> [ // @パスPATHを削除してcallbackを実行 // @ふぁいるさくじょしたとき
@@ -193,14 +193,14 @@ $exports = [
     'type' => 'func',
     'josi' => [['の', 'から']],
     'fn' => function($path, $sys) {
-      throw new Exception('未実装のメソッドです');
+      return stat($path);
     },
   ],
   'ファイルサイズ取得'=> [ // @パスPATHのファイルサイズを調べて返す // @ふぁいるさいずしゅとく
     'type' => 'func',
     'josi' => [['の', 'から']],
     'fn' => function($path, $sys) {
-      throw new Exception('未実装のメソッドです');
+      return filesize($path);
     },
   ],
   // @ パス操作
@@ -208,21 +208,40 @@ $exports = [
     'type' => 'func',
     'josi' => [['から', 'の']],
     'fn' => function($s) {
-      throw new Exception('未実装のメソッドです');
+      return basename($s);
     },
   ],
   'パス抽出'=> [ // @ファイル名Sからパス部分を抽出して返す // @ぱすちゅうしゅつ
     'type' => 'func',
     'josi' => [['から', 'の']],
     'fn' => function($s) {
-      throw new Exception('未実装のメソッドです');
+      return dirname($s);
+    },
+  ],
+  '絶対パス変換'=> [ // @相対パスを絶対パスに変換して返す // @ぜったいぱすへんかん
+    'type' => 'func',
+    'josi' => [['から', 'の']],
+    'fn' => function($s) {
+      return realpath($s);
     },
   ],
   '相対パス展開'=> [ // @ファイル名AからパスBを展開して返す // @そうたいぱすてんかい
     'type' => 'func',
     'josi' => [['を'], ['で']],
     'fn' => function($a, $b) {
-      throw new Exception('未実装のメソッドです');
+      $a = realpath($a);
+      $aa = explode('/', $a);
+      $bb = explode('/', $b);
+      if (substr($b, 0, 1) == '/') { return $b; }
+      foreach ($bb as $i => $f) {
+        if ($f == '.') {continue;}
+        if ($f == '..') {
+          array_pop($aa);
+          continue;
+        }
+        array_push($aa, $f);
+      }
+      return implode('/', $aa);
     },
   ],
   // @ フォルダ取得
@@ -230,14 +249,14 @@ $exports = [
     'type' => 'func',
     'josi' => [],
     'fn' => function() {
-      throw new Exception('未実装のメソッドです');
+      return getcwd();
     },
   ],
   'カレントディレクトリ変更'=> [ // @カレントディレクトリをDIRに変更する // @かれんとでぃれくとりへんこう
     'type' => 'func',
     'josi' => [['に', 'へ']],
     'fn' => function($dir) {
-      throw new Exception('未実装のメソッドです');
+      chdir($dir);
     },
     'return_none' => true,
   ],
@@ -245,14 +264,14 @@ $exports = [
     'type' => 'func',
     'josi' => [],
     'fn' => function() {
-      throw new Exception('未実装のメソッドです');
+      return getcwd();
     },
   ],
   '作業フォルダ変更'=> [ // @カレントディレクトリをDIRに変更する // @さぎょうふぉるだへんこう
     'type' => 'func',
     'josi' => [['に', 'へ']],
     'fn' => function($dir) {
-      throw new Exception('未実装のメソッドです');
+      chdir($dir);
     },
     'return_none' => true,
   ],
@@ -260,14 +279,14 @@ $exports = [
     'type' => 'func',
     'josi' => [],
     'fn' => function() {
-      throw new Exception('未実装のメソッドです');
+      return getenv('HOME');
     },
   ],
   'デスクトップ'=> [ // @デスクトップパスを取得して返す // @ですくとっぷ
     'type' => 'func',
     'josi' => [],
     'fn' => function($sys) {
-      throw new Exception('未実装のメソッドです');
+      return getenv('HOME').'/Desktop';
     },
   ],
   'マイドキュメント'=> [ // @マイドキュメントのパスを取得して返す // @まいどきゅめんと
@@ -282,7 +301,8 @@ $exports = [
     'type' => 'func',
     'josi' => [],
     'fn' => function($sys) {
-      throw new Exception('未実装のメソッドです');
+      global $__v0;
+      return $__v0['母艦パス'];
     },
   ],
   // @ 環境変数
@@ -290,14 +310,14 @@ $exports = [
     'type' => 'func',
     'josi' => [['の']],
     'fn' => function($s) {
-      throw new Exception('未実装のメソッドです');
+      return getenv($s);
     },
   ],
   '環境変数一覧取得'=> [ // @環境変数の一覧を返す // @かんきょうへんすういちらんしゅとく
     'type' => 'func',
     'josi' => [],
     'fn' => function() {
-      throw new Exception('未実装のメソッドです');
+      return getenv();
     },
   ],
   // @ 圧縮・解凍
@@ -306,7 +326,8 @@ $exports = [
     'type' => 'func',
     'josi' => [['に', 'へ']],
     'fn' => function($v, $sys) {
-      throw new Exception('未実装のメソッドです');
+      global $__v0;
+      $__v0['圧縮解凍ツールパス'] = $v;
     },
     'return_none' => true,
   ],
@@ -314,7 +335,10 @@ $exports = [
     'type' => 'func',
     'josi' => [['を', 'から'], ['に', 'へ']],
     'fn' => function($a, $b, $sys) {
-      throw new Exception('未実装のメソッドです');
+      global $__v0;
+      $path = $__v0['圧縮解凍ツールパス'];
+      $cmd = "\"$path\" x \"$a\" -o\"$b\" -y";
+      return exec($cmd);
     },
   ],
   '解凍時'=> [ // @解凍処理を行い、処理が完了したときにcallback処理を実行 // @かいとうしたとき
@@ -328,7 +352,10 @@ $exports = [
     'type' => 'func',
     'josi' => [['を', 'から'], ['に', 'へ']],
     'fn' => function($a, $b, $sys) {
-      throw new Exception('未実装のメソッドです');
+      global $__v0;
+      $path = $__v0['圧縮解凍ツールパス'];
+      $cmd = "\"$path\" a -r \"$b\" \"$a\" -y";
+      return exec($cmd);
     },
   ],
   '圧縮時'=> [ // @圧縮処理を行い完了したときにcallback処理を指定 // @あっしゅくしたとき
@@ -344,7 +371,7 @@ $exports = [
     'type' => 'func',
     'josi' => [],
     'fn' => function() {
-      throw new Exception('未実装のメソッドです');
+      exit;
     },
     'return_none' => true,
   ],
@@ -360,7 +387,7 @@ $exports = [
     'type' => 'func',
     'josi' => [],
     'fn' => function($sys) {
-      throw new Exception('未実装のメソッドです');
+      exit;
     },
     'return_none' => true,
   ],
@@ -368,7 +395,7 @@ $exports = [
     'type' => 'func',
     'josi' => [['']],
     'fn' => function($sec, $sys) {
-      throw new Exception('未実装のメソッドです');
+      usleep($sec * 1000);
     },
     'return_none' => true,
   ],
@@ -376,7 +403,7 @@ $exports = [
     'type' => 'func',
     'josi' => [],
     'fn' => function($sys) {
-      throw new Exception('未実装のメソッドです');
+      return PHP_OS;
     },
   ],
   'OSアーキテクチャ取得'=> [ // @OSアーキテクチャを返す // @OSあーきてくちゃしゅとく
@@ -409,7 +436,9 @@ $exports = [
     'type' => 'func',
     'josi' => [['と', 'を']],
     'fn' => function($msg, $sys) {
-      throw new Exception('未実装のメソッドです');
+      echo $msg;
+      $in = fgets(STDIN);
+      return $in;
     },
   ],
   // @ テスト
@@ -417,7 +446,7 @@ $exports = [
     'type' => 'func',
     'josi' => [['と'], ['が']],
     'fn' => function($a, $b, $sys) {
-      throw new Exception('未実装のメソッドです');
+      return $a == $b;
     },
   ],
   // @ ネットワーク
@@ -536,28 +565,28 @@ $exports = [
     'type' => 'func',
     'josi' => [['に', 'へ', 'を']],
     'fn' => function($str, $sys) {
-      throw new Exception('未実装のメソッドです');
+      return mb_convert_encoding($str, 'sjis');
     },
   ],
   'SJIS取得'=> [ // @Shift_JISのバイナリバッファを文字列に変換 // @SJISしゅとく
     'type' => 'func',
     'josi' => [['から', 'を', 'で']],
     'fn' => function($buf, $sys) {
-      throw new Exception('未実装のメソッドです');
+      return mb_convert_encoding($buf, 'utf-8', 'sjis,utf-8,jis,euc-jp,auto');
     },
   ],
   'エンコーディング変換'=> [ // @文字列SをCODEへ変換してバイナリバッファを返す // @ えんこーでぃんぐへんかん
     'type' => 'func',
     'josi' => [['を'], ['へ', 'で']],
     'fn' => function($s, $code, $sys) {
-      throw new Exception('未実装のメソッドです');
+      return mb_convert_encoding($s, $code);
     },
   ],
   'エンコーディング取得'=> [ // @バイナリバッファBUFをCODEから変換して返す // @えんこーでぃんぐしゅとく
     'type' => 'func',
     'josi' => [['を'], ['から', 'で']],
     'fn' => function($buf, $code, $sys) {
-      throw new Exception('未実装のメソッドです');
+      return mb_convert_encoding($buf, 'utf-8', $code);
     },
   ],
   // @ マウスとキーボード操作

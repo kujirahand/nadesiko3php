@@ -25,6 +25,7 @@ $exports = [
 global $__v0;
 $__v0['GET'] = isset($_GET) ? $_GET : [];
 $__v0['POST'] = isset($_POST) ? $_POST : [];
+$__v0['SERVER'] = isset($_SERVER) ? $_SERVER : [];
 if (isset($_SESSION)) {
   $__v0['SESSION'] = &$_SESSION;
 } else {
