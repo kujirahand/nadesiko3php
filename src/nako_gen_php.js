@@ -860,6 +860,7 @@ class NakoGenPHP {
     const varKey = `$__foreach_key${id}`
     const code =
       `${varArray}=${target};\n` +
+      `if (!is_array(${varArray})){ ${varArray}=[${target}];}\n` +
       `foreach (${varArray} as ${varKey} => ${varV})` + '{\n' +
       `  ${nameS} = ${sorePrefex}${varV};` + '\n' +
       `  ${key} = ${varKey};\n` +
@@ -945,6 +946,7 @@ class NakoGenPHP {
   convSwitch (node) {
     const value = this._convGen(node.value, true)
     const cases = node.cases
+    const trim = (s) => s.replace(/(^\s+|\s+$)/,'')
     let body = ''
     for (let i = 0; i < cases.length; i++) {
       const cvalue = cases[i][0]
@@ -953,10 +955,10 @@ class NakoGenPHP {
         body += `  default:\n`
       } else {
         const cvalue_code = this._convGen(cvalue, true)
-        body += `  case ${cvalue_code}:\n`
+        body += `  case ${trim(cvalue_code)}:\n`
       }
-      body += `    ${cblock}\n` +
-              `    break\n`
+      body += `    ${trim(cblock)}\n` +
+              `    break;\n`
     }
     const code =
       `switch (${value})` + '{\n' +

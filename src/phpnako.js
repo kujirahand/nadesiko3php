@@ -393,9 +393,13 @@ class PHPNako extends NakoCompiler {
     for (const f of files) {
       if (f.match(/\.nako3$/)) {
         const fpath = path.join(dir, f)
-        const cmd = `node "${__dirname}/phpnako.js" -c "${fpath}"`
         console.log(`*** conv: ${f}`)
-        execSync(cmd)
+        const cmd = `node "${__dirname}/phpnako.js" -c "${fpath}"`
+        try {
+          execSync(cmd)
+        } catch (e) {
+          console.error(e)
+        }
       }
     }
     console.log('ok')
@@ -403,20 +407,28 @@ class PHPNako extends NakoCompiler {
 
   /** 監視して変換する */
   watch () {
-    const conv = (path) => {
-      const cmd = `node "${__dirname}/phpnako.js" -c "${path}"`
-      console.log(`*** conv: ${path}`)
+    const conv = (fpath) => {
+      const f = path.dirname(fpath)
+      if (!f.match(/\.nako3$/)) { return }
+      console.log(`*** conv: ${fpath}`)
+      const cmd = `node "${__dirname}/phpnako.js" -c "${fpath}"`
+      try {
+        execSync(cmd)
+      } catch (e) {
+        console.error(e)
+      }
     }
     const dir = process.cwd()
     const ww = chokidar.watch(dir, {
       ignored: /[\/\\]\./,
       persistent: true
     })
+    // 最初に全部変換
+    this.convertDir(dir)
     ww.on('ready', () => {
       ww.on('add', (path) => conv(path))
       ww.on('change', (path) => conv(path))
     })
-    
   }
 }
 

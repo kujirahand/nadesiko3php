@@ -93,7 +93,7 @@ $exports = [
   'PDOオブジェクト' => ['type'=>'const', 'value' => null], // @PDOおぶじぇくと
   'PDO生成'=> [ // @DSNを指定してPDOを生成して返す // @PDOせいせい
     'type' => 'func',
-    'josi' => [['で','の']],
+    'josi' => [['で','の','を']],
     'fn' => function($dsn) {
       global $__v0;
       $__v0['PDOオブジェクト'] = $v = new PDO($dsn);
@@ -128,7 +128,7 @@ $exports = [
       $pdo = $__v0['PDOオブジェクト'];
       $st = $pdo->prepare($sql);
       $st->execute($a);
-      $res = $st->fetchAll();
+      return $st->fetchAll(PDO::FETCH_ASSOC);
     },
   ],
   'PDO一行取得'=> [ // @SQLコマンドをデータ配列Aで実行して結果を一行取得して返す // @PDOいちぎょうしゅとく
@@ -139,7 +139,7 @@ $exports = [
       $pdo = $__v0['PDOオブジェクト'];
       $st = $pdo->prepare($sql);
       $st->execute($a);
-      $res = $st->fetch();
+      return $st->fetch(PDO::FETCH_ASSOC);
     },
   ],
   'PDO挿入ID取得'=> [ // @PDO実行の結果、挿入したIDを得る。 // @PDOそうにゅうIDしゅとく
@@ -149,6 +149,43 @@ $exports = [
       global $__v0;
       $pdo = $__v0['PDOオブジェクト'];
       return $pdo->lastInsertId();
+    },
+  ],
+  // @HTML
+  'PDOオブジェクト' => ['type'=>'const', 'value' => null], // @PDOおぶじぇくと
+  'HTML変換'=> [ // @文字列SをHTMLに変換して返す // @HTMLへんかん
+    'type' => 'func',
+    'josi' => [['を','から']],
+    'fn' => function($s) {
+      return htmlspecialchars($s, ENT_QUOTES);
+    },
+  ],
+  'HTML埋込'=> [ // @文字列Sの中に辞書型データDICの値を埋め込んで返す。書式は「xxx[[変数名]]xx」のように書く。展開時に安全にHTML変換する。変換したくないものには[[変数名|raw]]と書く。または[[変数名|書式]]を記述(書式はsprintf)。// @HTMLうめこむ
+    'type' => 'func',
+    'josi' => [['に','へ'],['を']],
+    'fn' => function($s, $dic) {
+      $subject = $s;
+      return preg_replace_callback('#\[\[(.*?)\]\]#', function($m)use($dic) {
+        $key = $m[1];
+        $raw = FALSE;
+        $fmt = '';
+        if (strpos($key, '|') !== FALSE) {
+          if (preg_match('#\s*(.+?)\s*\|\s*([%a-zA-Z0-9_]+)#', $key, $m)) {
+            $key = $m[1];
+            if ($m[2] == 'raw') {
+              $raw = TRUE;
+            } else {
+              $fmt = $m[2];
+            }
+          }
+        }
+        $val = isset($dic[$key]) ? $dic[$key] : '';
+        if (!$raw) {
+          if ($fmt != '') { $val = sprintf($fmt, $val); }
+          $val = htmlspecialchars($val, ENT_QUOTES);
+        }
+        return $val;
+      }, $subject);
     },
   ],
 ];
