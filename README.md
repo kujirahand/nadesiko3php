@@ -6,10 +6,14 @@
 - [本家「なでしこ3」のリポジトリ](https://github.com/kujirahand/nadesiko3)
 - [「なでしこ3」のWEB](https://nadesi.com/)
 
-## インストール方法
+## 必要なツール
 
 なでしこ3エンジンコアは、Node.jsで開発されています。
-Node.jsを最初にインストールしておいてください。
+PHP7以上とNode.jsを最初にインストールしておいてください。
+
+## インストール方法
+
+リポジトリから取得する場合:
 
 ```
 $ git clone https://github.com/kujirahand/nadesiko3php.git
@@ -18,7 +22,7 @@ $ npm install
 
 ## 使い方
 
-コマンドラインで以下のようなコマンドを実行すると「プログラム.php」というファイルが作成されます。
+コマンドラインで以下のようなコマンドを実行すると「プログラム.php」というファイル(およびライブラリが入ったsrcフォルダ)が作成されます。
 
 ```
 $ phpnako -c (プログラム).nako3

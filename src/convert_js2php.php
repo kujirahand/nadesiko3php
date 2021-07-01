@@ -1,8 +1,9 @@
+#!/usr/bin/env php
 <?php
 
 // USAGE
 if (count($argv) < 2) {
-  echo "[USAGE] convert_js2php (jsfile)\n";
+  echo "[USAGE] convert_js2php.php (jsfile)\n";
   echo "なでしこのプラグインファイルからPHPのひな形を生成します。";
   exit;
 }
@@ -13,7 +14,7 @@ function conv($infile) {
   $body = file_get_contents($infile);
   $aaa = explode("\n", $body);
   echo "<?php // phpnako のプラグイン\n";
-  echo '$'."export = [\n";
+  echo '$'."exports = [\n";
   foreach ($aaa as $row) {
     // コメントの出力
     if (preg_match('#^\s*//\s+@\s*(.+)#', $row, $m)) {

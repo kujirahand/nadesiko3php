@@ -11,7 +11,11 @@ foreach ($files as $f) {
 }
 
 function conv($file) {
+  $exports = null;
   require_once($file);
+  if ($exports == null) {
+    echo "[ERROR] 変換できませんでした: $file\n";
+  }
   $json = json_encode($exports, 
     JSON_UNESCAPED_UNICODE /* |JSON_PRETTY_PRINT*/);
   $fname_out = $file.".json";

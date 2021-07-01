@@ -75,7 +75,9 @@ $exports = [
         $s .= "\n";
       }
       else if (is_array($s)) {
-        $s = trim(json_encode($s, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT))."\n";
+        $s = trim(json_encode($s, 
+          JSON_UNESCAPED_UNICODE |
+          JSON_UNESCAPED_SLASHES))."\n";
       }
       else {
         $s .= "\n";
@@ -822,14 +824,14 @@ $exports = [
     'type' => 'func',
     'josi' => [['を', 'の']],
     'fn' => function($v) {
-      return json_encode($v);
+      return json_encode($v, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
     },
   ],
   'JSONエンコード整形'=> [ // @オブジェクトVをJSON形式にエンコードして整形して返す // @JSONえんこーどせいけい
     'type' => 'func',
     'josi' => [['を', 'の']],
     'fn' => function($v) {
-      return json_encode($v, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE);
+      return json_encode($v, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
     },
   ],
   'JSONデコード'=> [ // @JSON文字列Sをオブジェクトにデコードして返す // @JSONでこーど
@@ -994,7 +996,11 @@ $exports = [
     'type' => 'func',
     'josi' => [['の', 'を']],
     'fn' => function(&$a) {
-      return array_reverse($a);
+      $b = array_reverse($a);
+      foreach ($b as $i => $v) {
+        $a[$i] = $v;
+      }
+      return $a;
     },
   ],
   '配列シャッフル'=> [ // @配列Aをシャッフルして返す。Aを書き換える // @はいれつしゃっふる
@@ -1100,28 +1106,34 @@ $exports = [
     'type' => 'func',
     'josi' => [['の'],['から'],['を','で']],
     'fn' => function($a, $no, $s) {
-      foreach ($a[$no] as $row) {
-        if (mb_strpos($row, $s) !== FALSE) {return $row;}
+      $res = [];
+      foreach ($a as $row) {
+        $v = $row[$no];
+        if (mb_strpos($v, $s) !== FALSE) { $res[] = $row; }
       }
-      return null;
+      return $res;
     },
   ],
   '表完全一致ピックアップ'=> [ // @配列Aの列番号B(0起点)(あるいはキー名)で検索文字列Sと一致する行を返す // @ひょうぴっくあっぷ
     'type' => 'func',
     'josi' => [['の'],['から'],['を','で']],
     'fn' => function($a, $no, $s) {
-      foreach ($a[$no] as $row) {
-        if ($row == $s) {return $row;}
+      $res = [];
+      foreach ($a as $row) {
+        $v = $row[$no];
+        if ($v == $s) { $res[] = $row; }
       }
-      return null;
+      return $res;
     },
   ],
   '表検索'=> [ // @二次元配列AでCOL列目(0起点)からキーSを含む行をROW行目から検索して何行目にあるか返す。見つからなければ-1を返す。 // @ひょうけんさく
     'type' => 'func',
     'josi' => [['の'],['で','に'],['から'],['を']],
     'fn' => function($a, $col, $row, $s) {
-      foreach ($a[$no] as $i => $row) {
-        if ($row == $s) {return $i;}
+      for ($i = $row; $i < count($a); $i++) {
+        if (!isset($a[$i][$col])) {continue;}
+        $v = $a[$i][$col];
+        if (mb_strpos($v, $s) !== FALSE) { return $i; }
       }
       return -1;
     },
@@ -1200,42 +1212,81 @@ $exports = [
     'type' => 'func',
     'josi' => [['の'],['を']],
     'fn' => function($a, $i, $sys) {
-      throw new Exception('未実装のメソッドです');
+        $na = [];
+        foreach ($a as $row) {
+          if (!isset($row[$i])) {
+            $na[] = '';
+            continue;
+          }
+          $na[] = $row[$i];
+        }
+        return $na;
     },
   ],
   '表列挿入'=> [ // @二次元配列Aの(0から数えて)I列目に配列Sを挿入して返す // @ひょうれつそうにゅう
     'type' => 'func',
     'josi' => [['の'],['に','へ'],['を']],
     'fn' => function($a, $i, $s) {
-      throw new Exception('未実装のメソッドです');
+        $na = [];
+        foreach ($a as $no => $row) {
+          $p = isset($s[$no]) ? $s[$no] : '';
+          array_splice($row, $i, 0, $p);
+          $na[] = $row;
+        }
+        return $na;
     },
   ],
   '表列削除'=> [ // @二次元配列Aの(0から数えて)I列目削除して返す // @ひょうれつそうにゅう
     'type' => 'func',
     'josi' => [['の'],['を']],
     'fn' => function($a, $i) {
-      throw new Exception('未実装のメソッドです');
+        $na = [];
+        foreach ($a as $row) {
+          if (isset($row[$i])) {
+            array_splice($row, $i, 1);
+          }
+          $na[] = $row;
+        }
+        return $na;
     },
   ],
   '表列合計'=> [ // @二次元配列Aの(0から数えて)I列目を合計して返す。 // @ひょうれつごうけい
     'type' => 'func',
     'josi' => [['の'],['を','で']],
     'fn' => function($a, $i) {
-      throw new Exception('未実装のメソッドです');
+        $total = 0;
+        foreach ($a as $row) {
+          if (isset($row[$i])) {
+            $total += floatval($row[$i]);
+          }
+        }
+        return $total;
     },
   ],
-  '表曖昧検索'=> [ // @二次元配列AのROW行目からCOL列目(0起点)で正規表現Sにマッチする行を検索して何行目にあるか返す。見つからなければ-1を返す。(v1非互換) // @ひょうれつあいまいけんさく
+  '表曖昧検索'=> [ // @二次元配列AのROW行目からCOL列目(0起点)で正規表現S(/パターン/の形式)にマッチする行を検索して何行目にあるか返す。見つからなければ-1を返す。(v1非互換) // @ひょうれつあいまいけんさく
     'type' => 'func',
     'josi' => [['の'],['から'],['で'],['を']],
     'fn' => function($a, $row, $col, $s) {
-      throw new Exception('未実装のメソッドです');
+      for ($no = $row; $no < count($a); $no++) {
+        if (!isset($a[$no][$col])) {continue;}
+        $data = $a[$no][$col];
+        if (preg_match($s, $data)) {return $no;}
+      }
+      return -1;
     },
   ],
   '表正規表現ピックアップ'=> [ // @二次元配列AでI列目(0起点)から正規表現パターンSにマッチする行をピックアップして返す。 // @ひょうせいきひょうげんぴっくあっぷ
     'type' => 'func',
     'josi' => [['の','で'],['から'],['を']],
     'fn' => function($a, $col, $s) {
-      throw new Exception('未実装のメソッドです');
+      $res = [];
+      foreach ($a as $row) {
+        $v = $row[$col];
+        if (preg_match($s, $v)) {
+          $res[] = $row;
+        }
+      }
+      return $res;
     },
   ],
   // @ 辞書型変数の操作
@@ -1243,21 +1294,22 @@ $exports = [
     'type' => 'func',
     'josi' => [['の']],
     'fn' => function($a) {
-      throw new Exception('未実装のメソッドです');
+      return array_keys($a);
     },
   ],
   '辞書キー削除'=> [ // @辞書型変数AからキーKEYを削除して返す（A自体を変更する）。 // @じしょきーさくじょ
     'type' => 'func',
     'josi' => [['から', 'の'], ['を']],
-    'fn' => function($a, $key) {
-      throw new Exception('未実装のメソッドです');
+    'fn' => function(&$a, $key) {
+      unset($a[$key]);
+      return $a;
     },
   ],
   '辞書キー存在'=> [ // @辞書型変数AのキーKEYが存在するか確認 // @じしょきーそんざい
     'type' => 'func',
     'josi' => [['の','に'],['が']],
     'fn' => function($a, $key) {
-      throw new Exception('未実装のメソッドです');
+      return isset($a[$key]) ? 1 : 0;
     },
   ],
   // @ ハッシュ
@@ -1265,36 +1317,38 @@ $exports = [
     'type' => 'func',
     'josi' => [['の']],
     'fn' => function($a, $sys) {
-      throw new Exception('未実装のメソッドです');
+      global $__v0;
+      return $__v0['辞書キー列挙']($a);
     },
   ],
   'ハッシュ内容列挙'=> [ // @ハッシュAの内容一覧を配列で返す。 // @はっしゅないようれっきょ
     'type' => 'func',
     'josi' => [['の']],
     'fn' => function($a) {
-      throw new Exception('未実装のメソッドです');
+      return array_values($a);
     },
   ],
-  'ハッシュキー削除'=> [ // @ハッシュAからキーKEYを削除して返す。 // @はっしゅきーさくじょ
+  'ハッシュキー削除'=> [ // @ハッシュAからキーKEYを削除して返す。(A自体を変更) // @はっしゅきーさくじょ
     'type' => 'func',
     'josi' => [['から', 'の'], ['を']],
-    'fn' => function($a, $key, $sys) {
-      throw new Exception('未実装のメソッドです');
+    'fn' => function(&$a, $key, $sys) {
+      unset($a[$key]);
+      return $a;
     },
   ],
   'ハッシュキー存在'=> [ // @ハッシュAのキーKEYが存在するか確認 // @はっしゅきーそんざい
     'type' => 'func',
     'josi' => [['の','に'],['が']],
     'fn' => function($a, $key) {
-      throw new Exception('未実装のメソッドです');
+      return isset($a[$key]) ? 1:0;
     },
   ],
   // @ タイマー
-  '秒待機'=> [ // @ 「!非同期モード」または「逐次実行構文」にて、N秒の間待機する // @びょうたいき
+  '秒待機'=> [ // @ N秒の間待機する // @びょうたいき
     'type' => 'func',
     'josi' => [['']],
     'fn' => function($n, $sys) {
-      throw new Exception('未実装のメソッドです');
+      usleep($n * 1000);
     },
     'return_none' => true,
   ],
@@ -1302,15 +1356,18 @@ $exports = [
     'type' => 'func',
     'josi' => [['']],
     'fn' => function($n, $sys) {
-      throw new Exception('未実装のメソッドです');
+      usleep($n * 1000);
     },
     'return_none' => true,
   ],
-  '秒後'=> [ // @無名関数（あるいは、文字列で関数名を指定）FをN秒後に実行する。変数『対象』にタイマーIDを代入する。 // @びょうご
+  '秒後'=> [ // @無名関数（あるいは、文字列で関数名を指定）FをN秒後に実行する。変数『対象』にタイマーIDを代入する。 (ただし、PHPでは同期的に実行される) // @びょうご
     'type' => 'func',
     'josi' => [['を'], ['']],
     'fn' => function($f, $n, $sys) {
-      throw new Exception('未実装のメソッドです');
+      usleep($n * 1000);
+      if (is_string($f)) {$f = nako3_findVar($f);}
+      if (is_callable($f)) { $f($sys); }
+      return 0;
     },
   ],
   '秒毎'=> [ // @無名関数（あるいは、文字列で関数名を指定）FをN秒ごとに実行する(『タイマー停止』で停止できる)。変数『対象』にタイマーIDを代入する。 // @びょうごと
@@ -1347,35 +1404,35 @@ $exports = [
     'type' => 'func',
     'josi' => [],
     'fn' => function() {
-      throw new Exception('未実装のメソッドです');
+      return date('H:i:s');
     },
   ],
   'システム時間'=> [ // @現在のUNIX時間 (UTC(1970/1/1)からの経過秒数) を返す // @しすてむじかん
     'type' => 'func',
     'josi' => [],
     'fn' => function() {
-      throw new Exception('未実装のメソッドです');
+      return time();
     },
   ],
   '今日'=> [ // @今日の日付を「YYYY/MM/DD」の形式で返す // @きょう
     'type' => 'func',
     'josi' => [],
     'fn' => function() {
-      throw new Exception('未実装のメソッドです');
+      return date('Y/m/d');
     },
   ],
   '曜日番号取得'=> [ // @Sに指定した日付の曜日番号をで返す。不正な日付の場合は今日の曜日番号を返す。(0=日/1=月/2=火/3=水/4=木/5=金/6=土) // @ようびばんごうしゅとく
     'type' => 'func',
     'josi' => [['の']],
     'fn' => function($s) {
-      throw new Exception('未実装のメソッドです');
+      return date('w');
     },
   ],
   '時間ミリ秒取得'=> [ // @ミリ秒単位の時間を数値で返す。結果は実装に依存する。 // @じかんみりびょうしゅとく
     'type' => 'func',
     'josi' => [],
     'fn' => function() {
-      throw new Exception('未実装のメソッドです');
+      return microtime();
     },
   ],
   // @ デバッグ支援
@@ -1383,35 +1440,39 @@ $exports = [
     'type' => 'func',
     'josi' => [['の', 'で']],
     'fn' => function($s) {
-      throw new Exception('未実装のメソッドです');
+      throw new Exception($s);
     },
   ],
   'システム関数一覧取得'=> [ // @システム関数の一覧を取得 // @しすてむかんすういちらんしゅとく
     'type' => 'func',
     'josi' => [],
     'fn' => function($sys) {
-      throw new Exception('未実装のメソッドです');
+      global $__v0;
+      return array_keys($__v0);
     },
   ],
   'システム関数存在'=> [ // @文字列で関数名を指定してシステム関数が存在するかを調べる // @しすてむかんすうそんざい
     'type' => 'func',
     'josi' => [['が', 'の']],
     'fn' => function($fname, $sys) {
-      throw new Exception('未実装のメソッドです');
+      global $__v0;
+      return isset($__v0[$fname]);
     },
   ],
   'プラグイン一覧取得'=> [ // @利用中のプラグイン一覧を得る // @ぷらぐいんいちらんしゅとく
     'type' => 'func',
     'josi' => [],
     'fn' => function($sys) {
-      throw new Exception('未実装のメソッドです');
+      global $nako3;
+      return $nako3['__module'];
     },
   ],
   'モジュール一覧取得'=> [ // @取り込んだモジュール一覧を得る // @もじゅーるいちらんしゅとく
     'type' => 'func',
     'josi' => [],
     'fn' => function($sys) {
-      throw new Exception('未実装のメソッドです');
+      global $nako3;
+      return $nako3['__module'];
     },
   ],
   '助詞一覧取得'=> [ // @文法として定義されている助詞の一覧を取得する // @じょしいちらんしゅとく
@@ -1434,7 +1495,8 @@ $exports = [
     'type' => 'func',
     'josi' => [['に','へ']],
     'fn' => function($s, $sys) {
-      throw new Exception('未実装のメソッドです');
+      global $__v0;
+      return $__v0['プラグイン名'];
     },
     'return_none' => true,
   ],
@@ -1443,21 +1505,26 @@ $exports = [
     'type' => 'func',
     'josi' => [['を', 'から']],
     'fn' => function($text) {
-      throw new Exception('未実装のメソッドです');
+      return urlencode($text);
     },
   ],
   'URLデコード'=> [ // @URLデコードして返す // @URLでこーど
     'type' => 'func',
     'josi' => [['を', 'へ', 'に']],
     'fn' => function($text) {
-      throw new Exception('未実装のメソッドです');
+      return urldecode($text);
     },
   ],
   'URLパラメータ解析'=> [ // @URLパラメータを解析してハッシュで返す // @URLぱらめーたかいせき
     'type' => 'func',
     'josi' => [['を', 'の', 'から']],
     'fn' => function($url, $sys) {
-      throw new Exception('未実装のメソッドです');
+      $q = parse_url($url);
+      if (isset($q['query'])) {
+        parse_str($q['query'], $res);
+        return $res;
+      }
+      return [];
     },
   ],
 ];

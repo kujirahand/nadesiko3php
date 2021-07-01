@@ -16,15 +16,18 @@ const nako_version = require('nadesiko3/src/nako_version.js')
 // this repository
 const NakoGenPHP = require('./nako_gen_php')
 const PluginSystem = require('./plugin_system.php.json')
+const PluginNode = require('./plugin_node.php.json')
 const PluginPHP = require('./plugin_php.php.json')
 
 class PHPNako extends NakoCompiler {
   /** @param {{ nostd?: boolean }} [opts] */
   constructor (opts = {}) {
     super({useBasicPlugin: false})
-    this.addPluginObject('plugin_system', PluginSystem)
-    this.silent = false
     this.addCodeGenerator('PHP', NakoGenPHP) // 「!PHP」をサポート
+    this.silent = false
+    this.addPluginObject('plugin_system', PluginSystem)
+    this.addPluginObject('plugin_node', PluginNode)
+    this.addPluginObject('plugin_php', PluginPHP)
     this.__varslist[0]['ナデシコ種類'] = 'phpnako'
   }
 

@@ -743,7 +743,7 @@ class NakoGenPHP {
     const codelist = list.map((e) => {
       const key = this._convGen(e.key, true)
       const val = this._convGen(e.value, true)
-      return `'${key}' => ${val}`
+      return `${key} => ${val}`
     })
     return '[' + codelist.join(',') + ']'
   }
