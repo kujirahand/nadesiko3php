@@ -5,9 +5,11 @@
 
 // global
 const fs = require('fs')
-const exec = require('child_process').exec
+const execSync = require('child_process').execSync
 const path = require('path')
 const fetch = require('node-fetch')
+const iconv = require('iconv-lite')
+
 // nadesiko3
 const NakoCompiler = require('nadesiko3/src/nako3')
 const { NakoImportError } = require('nadesiko3/src/nako_errors')
@@ -173,12 +175,11 @@ class PHPNako extends NakoCompiler {
     fs.writeFileSync(opt.output, jscode, 'utf-8')
     // プラグインPHPがあるかチェック
     this.copyRuntime(this.filename)
-    if (opt.run)
-      {exec(`php ${opt.output}`, function (err, stdout, stderr) {
-        if (err) {console.log('[ERROR]', stderr)}
-        console.log(stdout)
-      })}
-
+    if (opt.run) {
+      const res = execSync(`php ${opt.output}`);
+      const txt = iconv.decode(res, 'utf-8').replace(/\s+$/, '')
+      console.log(txt)
+    }
   }
   /**
    * ランタイムのコピー
@@ -207,28 +208,15 @@ class PHPNako extends NakoCompiler {
 
   // ワンライナーの場合
   cnakoOneLiner (opt) {
-    const org = opt.source
-    try {
-      if (opt.source.indexOf('表示') < 0) {
-        opt.source = '' + opt.source + 'を表示。'
-      }
-      this.run(opt.source)
-    } catch (e) {
-      // エラーになったら元のワンライナーで再挑戦
-      try {
-        if (opt.source != org) {
-          this.run(org)
-        }　else {
-          throw e
-        }
-      } catch (e) {
-        if (this.debug) {
-          throw e
-        } else {
-          console.error(e.message)
-        }
-      }
+    // テンポラリフォルダを作成
+    const tempDir = path.join(path.dirname(__dirname), 'tmp')
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir)
     }
+    opt.filename = path.join(tempDir, 'oneliner.nako3')
+    opt.output = path.join(tempDir, 'oneliner.php')
+    opt.run = true
+    this.nakoCompile(opt, opt.source, false)
   }
 
   /**
@@ -383,101 +371,12 @@ class PHPNako extends NakoCompiler {
     this.compileStandalone(code, filename, false, preCode)
     return this._runEx(code, fname, {}, preCode)
   }
-
-  /**
-   * プラグインファイルの検索を行う
-   * @param {string} pname
-   * @param {string} filename
-   * @param {string} srcDir このファイルが存在するディレクトリ
-   * @param {string[]} [log]
-   * @return {string} フルパス
-   */
-  static findPluginFile (pname, filename, srcDir, log = []) {
-    log.length = 0
-    /** @type {string[]} */
-    // フルパス指定か?
-    const p1 = pname.substr(0, 1)
-    if (p1 === '/') {
-      // フルパス指定なので何もしない
-      return pname
-    }
-    // 各パスを調べる
-    const exists = (f, desc) => {
-      const result = fs.existsSync(f)
-      log.push(f)
-      // console.log(result, 'exists[', desc, '] =', f)
-      return result
-    }
-    const f_check = (pathTest) => {
-      // 素直にチェック
-      let fpath = path.join(pathTest, pname)
-      if (exists(fpath, 'direct')) { return fpath }
-      
-      // プラグイン名を分解してチェック
-      const m = pname.match(/^(plugin_|nadesiko3\-)([a-zA-Z0-9_-]+)/)
-      if (!m) { return false }
-      const name = m[2]
-      // plugin_xxx.js
-      const plugin_xxx_js = 'plugin_' + name + '.js'
-      fpath = path.join(pathTest, plugin_xxx_js)
-      if (exists(fpath, 'plugin_xxx.js')) { return fpath }
-      fpath = path.join(pathTest, 'src', plugin_xxx_js)
-      if (exists(fpath, 'src/plugin_xxx.js')) { return fpath }
-      // nadesiko3-xxx
-      const nadesiko3_xxx = 'nadesiko3-' + name
-      fpath = path.join(pathTest, nadesiko3_xxx)
-      if (exists(fpath, 'nadesiko3-xxx')) { return fpath }
-      fpath = path.join(pathTest, 'node_modules', nadesiko3_xxx)
-      if (exists(fpath, 'node_modules/nadesiko3-xxx')) { return fpath }
-      return false
-    }
-    let fullpath
-    // 相対パスか?
-    if (p1 === '.') {
-      // 相対パス指定なので、なでしこのプログラムからの相対指定を調べる
-      const pathRelative = path.resolve(path.dirname(filename))
-      const fileRelative = f_check(pathRelative)
-      if (fileRelative) { return fileRelative }
-    }
-    // nako3スクリプトパスか?
-    const pathScript = path.resolve(path.dirname(filename))
-    const fileScript = f_check(pathScript)
-    if (fileScript) { return fileScript }
-        
-    // ランタイムパス/src
-    const pathRuntimeSrc = path.resolve(srcDir)
-    const fileRuntimeSrc = f_check(pathRuntimeSrc)
-    if (fileRuntimeSrc) { return fileRuntimeSrc }
-    // ランタイムパス
-    const pathRuntime = path.dirname(pathRuntimeSrc)
-    const fileRuntime = f_check(pathRuntime)
-    if (fileRuntime) { return fileRuntime }
-        
-    // 環境変数 NAKO_HOMEか?
-    if (process.env['NAKO_HOME']) {
-      const NAKO_HOME = path.resolve(process.env['NAKO_HOME'])
-      const fileHome = f_check(NAKO_HOME)
-      if (fileHome) { return fileHome }
-      // NAKO_HOME/src ?
-      const pathNakoHomeSrc = path.join(NAKO_HOME, 'src')
-      const fileNakoHomeSrc = f_check(pathNakoHomeSrc)
-      if (fileNakoHomeSrc) { return fileNakoHomeSrc }
-    }
-    // 環境変数 NODE_PATH (global) 以下にあるか？
-    if (process.env['NODE_PATH']) {
-      const pathNode = path.resolve(process.env['NODE_PATH'])
-      const fileNode = f_check(pathNode)
-      if (fileNode) { return fileNode }
-    }
-    // Nodeのパス検索に任せる
-    return pname
-  }
 }
 
 // メイン
 if (require.main === module) { // 直接実行する
-  const cnako3 = new PHPNako()
-  cnako3.execCommand()
+  const phpnako = new PHPNako()
+  phpnako.execCommand()
 } else { // モジュールとして使う場合
   module.exports = PHPNako
 }
