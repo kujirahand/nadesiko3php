@@ -58,6 +58,7 @@ class PHPNako extends NakoCompiler {
       .option('-m, --man [command]', 'マニュアルを表示する')
       .option('-p, --speed', 'スピード優先モードの指定')
       .option('-A, --ast', 'パースした結果をASTで出力する')
+      .option('-r, --dir [dir]', '指定したフォルダにあるファイルを全部変換する')
       // .option('-h, --help', '使い方を表示する')
       // .option('-v, --version', 'バージョンを表示する')
       .parse(process.argv)
@@ -100,7 +101,8 @@ class PHPNako extends NakoCompiler {
       'test': app.test || false,
       'browsers': app.browsers || false,
       'speed': app.speed || false,
-      'ast': app.ast || false
+      'ast': app.ast || false,
+      'dir': app.dir || false
     }
     args.mainfile = app.args[0]
     args.output = app.output
@@ -143,6 +145,10 @@ class PHPNako extends NakoCompiler {
     }
     if (opt.one_liner) { // ワンライナーで実行する
       this.cnakoOneLiner(opt)
+      return
+    }
+    if (opt.dir) { // フォルダを全部変換する
+      this.convertDir(opt)
       return
     }
 
@@ -370,6 +376,21 @@ class PHPNako extends NakoCompiler {
     // compile
     this.compileStandalone(code, filename, false, preCode)
     return this._runEx(code, fname, {}, preCode)
+  }
+
+  /** フォルダ内の全てを変換する */
+  convertDir (opt) {
+    const dir = opt.dir || '.'
+    const files = fs.readdirSync(dir)
+    for (const f of files) {
+      if (f.match(/\.nako3$/)) {
+        const fpath = path.join(dir, f)
+        const cmd = `node "${__dirname}/phpnako.js" -c "${fpath}"`
+        console.log(`*** conv: ${f}`)
+        execSync(cmd)
+      }
+    }
+    console.log('ok')
   }
 }
 
