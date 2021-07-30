@@ -1,10 +1,10 @@
 {
   "name": "nadesiko3php",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Japanese Programming Language \"Nadesiko3\" with PHP ",
   "main": "phpnako.js",
   "bin": {
-    "phppnako": "src/phpnako.js"
+    "phpnako": "src/phpnako.js"
   },
   "scripts": {
     "test": "mocha",
