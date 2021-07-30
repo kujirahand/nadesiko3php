@@ -85,10 +85,11 @@ $ phpnako -e "1+2×3を表示。"
 
 # 利用できる命令
 
-なでしこ３のplugin_systemとplugin_nodeが使えます。
-また、専用の命令もあります。
+なでしこ３の以下のプラグイン命令が使えます。
 
-[plugin_php](https://github.com/kujirahand/nadesiko3php/blob/main/src/plugin_php.php)を御覧ください。
+ - [plugin_system](https://nadesi.com/v3/doc/index.php?plugin_system&show)
+ - [plugin_node](https://nadesi.com/v3/doc/index.php?plugin_node&show)
+ - [plugin_php](https://github.com/kujirahand/nadesiko3php/blob/main/src/plugin_php.php)
 
 
 
