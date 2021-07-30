@@ -142,7 +142,7 @@ class PHPNako extends NakoCompiler {
       this.cnakoBrowsers()
       return
     }
-    if (opt.mainfile) {this.filename = opt.mainfile}
+    if (opt.mainfile) {this.filename = path.basename(opt.mainfile) }
     if (opt.repl) { // REPLを実行する
       this.cnakoRepl(opt)
       return
