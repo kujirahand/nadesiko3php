@@ -25,7 +25,7 @@
 ## 実行に必要なツール
 
 なでしこ3エンジンコアは、Node.jsで開発されています。
-そのため、PHP7以上と[Node.js](https://nodejs.org)を最初にインストールしておいてください。
+そのため、[PHP7以上](https://www.php.net/)と[Node.js](https://nodejs.org)を最初にインストールしておいてください。
 
 ## なでしこ3PHPのインストール方法
 
