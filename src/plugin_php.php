@@ -83,7 +83,7 @@ $exports = [
   ],
   'ヘッダ設定'=> [ // @HTTPヘッダをVに設定する // @へっだせってい
     'type' => 'func',
-    'josi' => [['を'],['で', 'にて']],
+    'josi' => [['に', 'へ', 'の']],
     'fn' => function($v) {
       header($v);
     },
@@ -152,7 +152,6 @@ $exports = [
     },
   ],
   // @HTML
-  'PDOオブジェクト' => ['type'=>'const', 'value' => null], // @PDOおぶじぇくと
   'HTML変換'=> [ // @文字列SをHTMLに変換して返す // @HTMLへんかん
     'type' => 'func',
     'josi' => [['を','から']],
