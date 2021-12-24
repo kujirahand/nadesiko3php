@@ -159,7 +159,7 @@ $exports = [
       return htmlspecialchars($s, ENT_QUOTES);
     },
   ],
-  'HTML埋込'=> [ // @文字列Sの中に辞書型データDICの値を埋め込んで返す。書式は「xxx[[変数名]]xx」のように書く。展開時に安全にHTML変換する。変換したくないものには[[変数名|raw]]と書く。または[[変数名|書式]]を記述(書式はsprintfかdate/time)。// @HTMLうめこむ
+  'HTML埋込'=> [ // @文字列Sの中に辞書型データDICの値を埋め込んで返す。書式は「xxx[[変数名]]xx」のように書く。展開時に安全にHTML変換する。変換したくないものには[[変数名|raw]]と書く。または[[変数名|書式]]を記述(書式はsprintfかdate/time/datetime)。// @HTMLうめこむ
     'type' => 'func',
     'josi' => [['に','へ'],['を']],
     'fn' => function($s, $dic) {
@@ -184,6 +184,8 @@ $exports = [
             $val = date('Y/m/d', intval($val));
           } else if ($fmt == 'time') {
             $val = date('H:i:s', intval($val));
+          } else if ($fmt == 'datetime') {
+            $val = date('Y/m/d H:i:s', intval($val));
           } else if ($fmt != '') {
             $val = sprintf($fmt, $val);
           }

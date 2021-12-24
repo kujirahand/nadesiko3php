@@ -1,8 +1,9 @@
 <?php
-// 関数を定義した後に php2json.php を実行
+// 関数を定義した後に convert_php2json.php を実行
 // 関数の定義は $exports という名前の変数に代入する
 
 global $nako3;
+if (!isset($nako3)) { $nako3['version'] = '3.0.0'; }
 $exports = [
   // @ システム定数
   'ナデシコバージョン' => ['type'=>'const', 'value' => $nako3['version']], // @なでしこばーじょん
@@ -1412,6 +1413,13 @@ $exports = [
     'josi' => [],
     'fn' => function() {
       return time();
+    },
+  ],
+  'システム時間ミリ秒'=> [ // @現在のUNIX時間 (UTC(1970/1/1)からの経過秒数)をミリ秒単位で返す // @しすてむじかんみりびょう
+    'type' => 'func',
+    'josi' => [],
+    'fn' => function() {
+      return ceil(microtime(true)*1000);
     },
   ],
   '今日'=> [ // @今日の日付を「YYYY/MM/DD」の形式で返す // @きょう
