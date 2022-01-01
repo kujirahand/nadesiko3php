@@ -1401,6 +1401,7 @@ $exports = [
     'return_none' => true,
   ],
   // @ 日時処理(簡易)
+  '元号データ' => ['type'=>'const', 'value' => [[ '元号'=> '令和', '改元日'=> '2019/05/01' ], [ '元号'=> '平成', '改元日'=> '1989/01/08' ], [ '元号'=> '昭和', '改元日'=> '1926/12/25' ], [ '元号'=> '大正', '改元日'=> '1912/07/30' ], [ '元号'=> '明治', '改元日'=> '1868/10/23' ]]], // @げんごうでーた
   '今'=> [ // @現在時刻を「HH:mm:ss」の形式で返す // @いま
     'type' => 'func',
     'josi' => [],
@@ -1429,11 +1430,134 @@ $exports = [
       return date('Y/m/d');
     },
   ],
+  '明日'=> [ // @日付を「YYYY/MM/DD」の形式で返す // @あす
+    'type' => 'func',
+    'josi' => [],
+    'fn' => function() {
+      return date('Y/m/d', (time() + 24 * 60 * 60));
+    },
+  ],
+  '昨日'=> [ // @「YYYY/MM/DD」の形式で返す // @きのう
+    'type' => 'func',
+    'josi' => [],
+    'fn' => function() {
+      return date('Y/m/d',(time() - 24 * 60 * 60));
+    },
+  ],
+  '今年'=> [ // @今年を「YYYY」の形式で返す // @ことし
+    'type' => 'func',
+    'josi' => [],
+    'fn' => function() {
+      return date('Y');
+    },
+  ],
+  '来年'=> [ // @来年を「YYYY」の形式で返す // @らいねん
+    'type' => 'func',
+    'josi' => [],
+    'fn' => function() {
+      $y = intval(date('Y'));
+      return $y + 1;
+    },
+  ],
+  '去年'=> [ // @日付を「YYYY/MM/DD」の形式で返す // @きょねん
+    'type' => 'func',
+    'josi' => [],
+    'fn' => function() {
+      $y = intval(date('Y'));
+      return $y - 1;
+    },
+  ],
+  '今月'=> [ // @日付を「MM」の形式で返す // @こんげつ
+    'type' => 'func',
+    'josi' => [],
+    'fn' => function() {
+      return date('m');
+    },
+  ],
+  '来月'=> [ // @日付を「MM」の形式で返す // @らいげつ
+    'type' => 'func',
+    'josi' => [],
+    'fn' => function() {
+      return date('m', strtotime('+1 month'));
+    },
+  ],
+  '先月'=> [ // @日付を「MM」の形式で返す // @せんげつ
+    'type' => 'func',
+    'josi' => [],
+    'fn' => function() {
+      return date('m', strtotime('-1 month'));
+    },
+  ],
+  '曜日'=> [ // @Sに指定した日付の曜日をで返す。 // @ようび
+    'type' => 'func',
+    'josi' => [['の']],
+    'fn' => function($s) {
+      $t = strtotime($s);
+      $no = date('w');
+      return ['日','月','火', '水', '木', '金', '土'][$no];
+    },
+  ],
   '曜日番号取得'=> [ // @Sに指定した日付の曜日番号をで返す。不正な日付の場合は今日の曜日番号を返す。(0=日/1=月/2=火/3=水/4=木/5=金/6=土) // @ようびばんごうしゅとく
     'type' => 'func',
     'josi' => [['の']],
     'fn' => function($s) {
-      return date('w');
+      $t = strtotime($s);
+      return date('w', $t);
+    },
+  ],
+  'UNIXTIME変換'=> [ // @Sに指定した日付をUNIXTIMEで返す。 // @UNIXTIMEへんかん
+    'type' => 'func',
+    'josi' => [['の','を','から']],
+    'fn' => function($s) {
+      return strtotime($s);
+    },
+  ],
+  'UNIX時間変換'=> [ // @Sに指定した日付をUNIXTIMEで返す。 // @UNIXじかんへんかん
+    'type' => 'func',
+    'josi' => [['の','を','から']],
+    'fn' => function($s) {
+      return strtotime($s);
+    },
+  ],
+  '日時変換'=> [ // @TMに指定したUNIXTIMEを日付で返す。 // @にちじへんかん
+    'type' => 'func',
+    'josi' => [['を','から']],
+    'fn' => function($tm) {
+      return date('Y/m/d H:i:s', $tm);
+    },
+  ],
+  '日時書式変換'=> [ // @TMを日付書式FMT(PHP形式)で返す。 // @にちじしょしきへんかん
+    'type' => 'func',
+    'josi' => [['を','で']],
+    'fn' => function($tm, $fmt) {
+      if (is_string($tm)) {
+        $tm = strtotime($tm);
+      }
+      return date($fmt, $tm);
+    },
+  ],
+  '和暦変換'=> [ // @TMを和暦で返す。 // @われきへんかん
+    'type' => 'func',
+    'josi' => [['を']],
+    'fn' => function($tm, $sys) {
+      $wareki = $sys['__varslist'][0]['元号データ'];
+      if (is_string($tm)) {
+          // $tm = str_replace('/', '-', $tm);
+          $tm = strtotime($tm);
+      }
+      $y = date('Y', $tm);
+      foreach ($wareki as $w) {
+        $gengo = $w['元号'];
+        $kaigenbi = $w['改元日'];
+        $wt = strtotime($kaigenbi);
+        $wy = date('Y', $wt);
+        if ($tm >= $wt) {
+          $g = $y - $wy + 1;
+          if ($g == 1) { $g = '元'; }
+          return date("{$gengo}{$g}年m月d日", $tm);
+        }
+      }
+      return date('Y年m月d日', $tm);
     },
   ],
   '時間ミリ秒取得'=> [ // @ミリ秒単位の時間を数値で返す。結果は実装に依存する。 // @じかんみりびょうしゅとく
