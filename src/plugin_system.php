@@ -1560,6 +1560,120 @@ $exports = [
       return date('Y年m月d日', $tm);
     },
   ],
+  '年数差'=> [ // @日付AとBの差を年数で求めて返す。 // @ねんすうさ
+    'type' => 'func',
+    'josi' => [['と','から'],['の','までの']],
+    'fn' => function($a, $b) {
+      $ta = strtotime($a);
+      $tb = strtotime($b);
+      $sa = ceil(($tb - $ta) / (365 * 24 * 60 * 60));
+      return $sa;
+    },
+  ],
+  '月数差'=> [ // @日付AとBの差を求めて返す。 // @げっすうさ
+    'type' => 'func',
+    'josi' => [['と','から'],['の','までの']],
+    'fn' => function($a, $b) {
+      $ta = strtotime($a);
+      $tb = strtotime($b);
+      $ya = date('Y', $ta);
+      $ma = date('m', $ta);
+      $yb = date('Y', $tb);
+      $mb = date('m', $tb);
+      $sa = ($yb * 12 + $mb) - ($ya * 12 + $ma);
+      return $sa;
+    },
+  ],
+  '日数差'=> [ // @日付AとBの差を求めて返す。 // @にっすうさ
+    'type' => 'func',
+    'josi' => [['と','から'],['の','までの']],
+    'fn' => function($a, $b) {
+      $ta = strtotime($a);
+      $tb = strtotime($b);
+      $sa = ceil(($tb - $ta) / (24 * 60 * 60));
+      return $sa;
+    },
+  ],
+  '時間差'=> [ // @AとBの差を求めて返す。 // @じかんさ
+    'type' => 'func',
+    'josi' => [['と','から'],['の','までの']],
+    'fn' => function($a, $b) {
+      $ta = strtotime($a);
+      $tb = strtotime($b);
+      $sa = ceil(($tb - $ta) / (60 * 60));
+      return $sa;
+    },
+  ],
+  '分差'=> [ // @AとBの差を求めて返す。 // @ふんさ
+    'type' => 'func',
+    'josi' => [['と','から'],['の','までの']],
+    'fn' => function($a, $b) {
+      $ta = strtotime($a);
+      $tb = strtotime($b);
+      $sa = ceil(($tb - $ta) / (60));
+      return $sa;
+    },
+  ],
+  '秒差'=> [ // @日付AとBの差を求めて返す。 // @びょうさ
+    'type' => 'func',
+    'josi' => [['と','から'],['の']],
+    'fn' => function($a, $b) {
+      $ta = strtotime($a);
+      $tb = strtotime($b);
+      $sa = ceil($tb - $ta);
+      return $sa;
+    },
+  ],
+  '日時差'=> [ // @返す。 // @にちじさ
+    'type' => 'func',
+    'josi' => [['と','から'],['の']],
+    'fn' => function($a, $b, $unit) {
+        throw new Exception('Not Supported');
+    },
+  ],
+  '日時差'=> [ // @返す。 // @にちじさ
+    'type' => 'func',
+    'josi' => [['と','から'],['の']],
+    'fn' => function($a, $b, $unit) {
+        throw new Exception('Not Supported');
+    },
+  ],
+  '時間加算'=> [ // @時間SにAを加えて返す。Aには「(+｜-)hh:nn:dd」で指定する。 // @じかんかさん
+    'type' => 'func',
+    'josi' => [['に'],['を']],
+    'fn' => function($s, $a) {
+      $t = strtotime($s);
+      $zero = strtotime('00:00:00');
+      $flag = substr($a, 0, 1);
+      $sign = 1;
+      if ($flag == '+') { $a = substr($a, 1); }
+      if ($flag == '-') { $a = substr($a, 1); $sign = -1; }
+      $ta = strtotime($a) - $zero;
+      $t += ($ta * $sign);
+      return date('H:i:s', $t);
+    },
+  ],
+  '日付加算'=> [ // @返す。 // @ひづけかさん
+    'type' => 'func',
+    'josi' => [['に'],['を']],
+    'fn' => function($s, $a) {
+      $ts = strtotime($s);
+      $flag = substr($a, 0, 1);
+      $sign = '+';
+      if ($flag == '+') { $a = substr($a, 1); }
+      if ($flag == '-') { $a = substr($a, 1); $sign = '-'; }
+      list($ya,$ma,$da) = explode('/', $a.'///');
+      $res = strtotime("{$sign}{$ya} years {$ma} month {$da} days", $ts); 
+      return date('H:i:s', $res);
+    },
+  ],
+  '日時加算'=> [ // @返す。 // @にちじかさん
+    'type' => 'func',
+    'josi' => [['と','から'],['の']],
+    'fn' => function($a, $b, $unit) {
+        throw new Exception('Not Supported');
+    },
+  ],
   '時間ミリ秒取得'=> [ // @ミリ秒単位の時間を数値で返す。結果は実装に依存する。 // @じかんみりびょうしゅとく
     'type' => 'func',
     'josi' => [],
