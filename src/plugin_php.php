@@ -15,8 +15,8 @@ $exports = [
   ],
   'セッション開始'=> [ // @PHPセッションを開始する。 // @せっしょんかいし
     'type' => 'func',
-    'josi' => [['を','の','から']],
-    'fn' => function($file) {
+    'josi' => [],
+    'fn' => function() {
       @session_start();
     },
     'return_none' => TRUE,
