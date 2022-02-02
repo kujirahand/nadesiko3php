@@ -73,9 +73,9 @@ $exports = [
       return empty($_SESSION[$key]) ? $def : $_SESSION[$key];
     },
   ],
-  'セッション設定'=> [ // @セッションパラメータのKEYをVで設定する // @せっしょんせってい
+  'セッション設定'=> [ // @セッションパラメータのKEYをVに設定する // @せっしょんせってい
     'type' => 'func',
-    'josi' => [['を'],['で', 'にて']],
+    'josi' => [['を'],['に', 'で', 'へ']],
     'fn' => function($key, $v) {
       $_SESSION[$key] = $v;
     },

@@ -22,6 +22,7 @@ const NakoGenPHP = require('./nako_gen_php')
 const PluginSystem = require('./plugin_system.php.json')
 const PluginNode = require('./plugin_node.php.json')
 const PluginPHP = require('./plugin_php.php.json')
+const PluginMath = require('./plugin_math.php.json')
 
 class PHPNako extends NakoCompiler {
   /** @param {{ nostd?: boolean }} [opts] */
@@ -32,6 +33,7 @@ class PHPNako extends NakoCompiler {
     this.addPluginObject('plugin_system', PluginSystem)
     this.addPluginObject('plugin_node', PluginNode)
     this.addPluginObject('plugin_php', PluginPHP)
+    this.addPluginObject('plugin_math', PluginMath)
     this.__varslist[0]['ナデシコ種類'] = 'phpnako'
   }
 
