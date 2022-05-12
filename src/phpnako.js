@@ -12,7 +12,7 @@ const iconv = require('iconv-lite')
 const chokidar = require('chokidar')
 
 // nadesiko3
-const NakoCompiler = require('nadesiko3/src/nako3')
+const NakoCompiler = require('nadesiko3/src/nako3.js')
 const { NakoImportError } = require('nadesiko3/src/nako_errors')
 const app = require('nadesiko3/src/commander_ja.js')
 const nako_version = require('nadesiko3/src/nako_version.js')
