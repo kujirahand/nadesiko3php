@@ -25,9 +25,15 @@
 ## 実行に必要なツール
 
 なでしこ3エンジンコアは、Node.jsで開発されています。
-そのため、[PHP7以上](https://www.php.net/)と[Node.js](https://nodejs.org)を最初にインストールしておいてください。
+そのため、実行には[PHP7以上](https://www.php.net/)と[Node.js](https://nodejs.org)が必要です。
 
-## なでしこ3PHPのインストール方法
+## Windowsでなでしこ3PHPをインストールする方法
+
+- (1) 本リポジトリに含まれる、[win32-start.nako](/win32-start.nako)と[php.ini](/php.ini)を同じフォルダに保存します。
+- (2) [なでしこv1](https://nadesi.com/top/go.php?6)で`win32-start.nako`を実行してください。
+- (3) ボタンが複数表示されるので、上から順にボタンをクリックしていくと、セットアップできます。
+
+## 上記の方法を使わず、なでしこ3PHPのインストール方法
 
 npmを使ってインストールする場合:
 
@@ -65,7 +71,7 @@ $ phpnako --watch
 なおPHPのサーバーモードを使えば、なでしこPHPとPHPだけで開発が可能です。以下のコマンドでPHPのサーバーが起動します。その後、ブラウザで「[http://localhost:8888](http://localhost:8888)」へアクセスすると実行結果を確認できます。
 
 ```
-$ php -S 0.0.0.0:8888
+$ php -S 0.0.0.0:8888 -c php.ini
 ```
 
 ### レンタルサーバーなどにアップして動かす場合
