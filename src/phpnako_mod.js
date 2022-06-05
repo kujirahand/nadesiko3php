@@ -162,7 +162,7 @@ export class PHPNako extends NakoCompiler {
       console.log(app.getHelp())
       return
     }
-    execMainfile(opt)
+    this.execMainfile(opt)
   }
 
   execMainfile (opt) {
