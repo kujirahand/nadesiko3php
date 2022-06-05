@@ -50,6 +50,7 @@ $exports = [
   ],
   'GET' => ['type'=>'const', 'value'=>[]], // @GET
   'POST' => ['type'=>'const', 'value'=>[]], // @POST 
+  'SERVER' => ['type'=>'const', 'value'=>[]], // @SERVER
   'FILES' => ['type'=>'const', 'value'=>[]], // @FILES 
   'SESSION' => ['type'=>'const', 'value'=>[]], // @SESSION
   'GET取得'=> [ // @GETパラメータのKEYを、省略値DEFで取得する // @GETしゅとく
