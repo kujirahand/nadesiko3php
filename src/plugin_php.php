@@ -2,8 +2,28 @@
 // PHPに関する機能を宣言したもの
 global $nako3;
 $exports = [
+  // 初期化
+  '初期化' => [
+    'type' => 'func',
+    'josi' => [],
+    'fn' => function($nako3) {
+      // システム変数に必要な値を代入しておく
+      global $__v0;
+      $__v0['GET'] = isset($_GET) ? $_GET : [];
+      $__v0['POST'] = isset($_POST) ? $_POST : [];
+      $__v0['FILES'] = isset($_FILES) ? $_FILES : [];
+      $__v0['SERVER'] = isset($_SERVER) ? $_SERVER : [];
+      if (isset($_SESSION)) {
+        $__v0['SESSION'] = &$_SESSION;
+      } else {
+        $__v0['SESSION'] = [];
+      }
+    },
+    'return_none' => TRUE,
+  ],
   // @PHP定数
   'PHPバージョン' => ['type'=>'const', 'value' => phpversion()], // @PHPばーじょん
+  'PLUGIN_PHPバージョン' => ['type'=>'const', 'value' => '0.0.1'], // @PLUGIN_PHPばーじょん
   // @PHPシステム
   'PHP取込'=> [ // @PHPファイルを取り込む。 // @PHPとりこむ
     'type' => 'func',
@@ -197,16 +217,3 @@ $exports = [
     },
   ],
 ];
-
-// システム変数に必要な値を代入しておく
-global $__v0;
-$__v0['GET'] = isset($_GET) ? $_GET : [];
-$__v0['POST'] = isset($_POST) ? $_POST : [];
-$__v0['FILES'] = isset($_POST) ? $_FILES : [];
-$__v0['SERVER'] = isset($_SERVER) ? $_SERVER : [];
-if (isset($_SESSION)) {
-  $__v0['SESSION'] = &$_SESSION;
-} else {
-  $__v0['SESSION'] = [];
-}
-

@@ -4,26 +4,33 @@
  */
 
 // global
-const fs = require('fs')
-const execSync = require('child_process').execSync
-const path = require('path')
-const fetch = require('node-fetch')
-const iconv = require('iconv-lite')
-const chokidar = require('chokidar')
+import fs from 'fs'
+import { execSync } from 'child_process'
+import path from 'path'
+import fetch from 'node-fetch'
+import iconv from 'iconv-lite'
+import chokidar from 'chokidar'
 
 // nadesiko3
-const NakoCompiler = require('nadesiko3/src/nako3.js')
-const { NakoImportError } = require('nadesiko3/src/nako_errors')
-const app = require('nadesiko3/src/commander_ja.js')
-const nako_version = require('nadesiko3/src/nako_version.js')
+import { NakoCompiler } from 'nadesiko3/core/src/nako3.mjs'
+import { NakoImportError } from 'nadesiko3/core/src/nako_errors.mjs'
+import app from 'nadesiko3/src/commander_ja.mjs'
+import nako_version from 'nadesiko3/src/nako_version.mjs'
 
 // this repository
-const NakoGenPHP = require('./nako_gen_php')
-const PluginSystem = require('./plugin_system.php.json')
-const PluginNode = require('./plugin_node.php.json')
-const PluginPHP = require('./plugin_php.php.json')
-const PluginMath = require('./plugin_math.php.json')
+import { NakoGenPHP } from './nako_gen_php.js'
 
+import url from 'url';
+const __filename = url.fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// read plugins
+const PluginSystem = JSON.parse(fs.readFileSync(path.join(__dirname, 'plugin_system.php.json')))
+const PluginNode = JSON.parse(fs.readFileSync(path.join(__dirname, 'plugin_node.php.json')))
+const PluginPHP = JSON.parse(fs.readFileSync(path.join(__dirname, 'plugin_php.php.json')))
+const PluginMath = JSON.parse(fs.readFileSync(path.join(__dirname, 'plugin_math.php.json')))
+
+/** PHPNako */
 class PHPNako extends NakoCompiler {
   /** @param {{ nostd?: boolean }} [opts] */
   constructor (opts = {}) {
@@ -45,7 +52,7 @@ class PHPNako extends NakoCompiler {
 
     // commanderを使って引数を解析する
     app
-      .title('日本語プログラミング言語「なでしこ」v' + nako_version.version + '(PHP)')
+      .title('日本語プログラミング言語「なでしこ3PHP」v' + nako_version.version)
       .version(nako_version.version, '-v, --version')
       .usage('[オプション] 入力ファイル.nako3')
       .option('-w, --warn', '警告を表示する')
@@ -58,8 +65,6 @@ class PHPNako extends NakoCompiler {
       .option('-o, --output', '出力ファイル名の指定')
       .option('-s, --silent', 'サイレントモードの指定')
       .option('-l, --repl', '対話シェル(REPL)の実行')
-      .option('-b, --browsers', '対応機器/Webブラウザを表示する')
-      .option('-m, --man [command]', 'マニュアルを表示する')
       .option('-p, --speed', 'スピード優先モードの指定')
       .option('-A, --ast', 'パースした結果をASTで出力する')
       .option('-r, --dir [dir]', '指定したフォルダにあるファイルを全部変換する')
@@ -128,7 +133,9 @@ class PHPNako extends NakoCompiler {
           args.output = args.mainfile + '.php'
         }
       }
-      args.mainfile += '.nako3'
+      if (args.mainfile) {
+        args.mainfile += '.nako3'
+      }
     }
     return args
   }
@@ -136,14 +143,6 @@ class PHPNako extends NakoCompiler {
   // 実行する
   execCommand () {
     const opt = this.checkArguments()
-    if (opt.man) {
-      this.cnakoMan(opt.man)
-      return
-    }
-    if (opt.browsers) { // 対応ブラウザを表示する
-      this.cnakoBrowsers()
-      return
-    }
     if (opt.mainfile) {this.filename = path.basename(opt.mainfile) }
     if (opt.repl) { // REPLを実行する
       this.cnakoRepl(opt)
@@ -159,6 +158,10 @@ class PHPNako extends NakoCompiler {
     }
     if (opt.watch) { // 監視して変換する
       this.watch(opt)
+      return
+    }
+    if (opt.mainfile === undefined) {
+      console.log(app.getHelp())
       return
     }
 
@@ -185,7 +188,7 @@ class PHPNako extends NakoCompiler {
    */
   nakoCompile(opt, src, isTest) {
     // system
-    src = '!"PHP"をモード設定\n' + src
+    src = '!"PHP"をモード設定; ' + src
     try {
       const jscode = this.compileStandalone(src, this.filename, isTest)
       fs.writeFileSync(opt.output, jscode, 'utf-8')
@@ -295,28 +298,6 @@ class PHPNako extends NakoCompiler {
     this.run(src, true)
   }
 
-  // マニュアルを表示する
-  cnakoMan(command) {
-    try {
-      const commands = require('../release/command_cnako3.json')
-      const data = commands[command]
-      for (const key in data) {
-        console.log(`${key}: ${data[key]}`)
-      }
-    } catch (e) {
-      if (e.code === 'MODULE_NOT_FOUND') {
-        console.log('コマンド一覧がないため、マニュアルを表示できません。以下のコマンドでコマンド一覧を生成してください。\n$ npm run build')
-      } else {
-        throw e
-      }
-    }
-  }
-
-  // 対応機器/Webブラウザを表示する
-  cnakoBrowsers () {
-    console.log(fs.readFileSync(path.join(__dirname, 'browsers.md'), 'utf-8'))
-  }
-
   /**
    * @param {string} code
    * @param {string} filename
@@ -355,7 +336,7 @@ class PHPNako extends NakoCompiler {
           sync: true,
           value: () => {
             try {
-              return require(name)
+              return JSON.parse(fs.readFileSync(name))
             } catch (/** @type {unknown} */err) {
               let msg = `プラグイン ${name} の取り込みに失敗: ${err instanceof Error ? err.message : err + ''}`
               if (err instanceof Error && err.message.startsWith('Cannot find module')) {
@@ -438,10 +419,5 @@ class PHPNako extends NakoCompiler {
   }
 }
 
-// メイン
-if (require.main === module) { // 直接実行する
-  const phpnako = new PHPNako()
-  phpnako.execCommand()
-} else { // モジュールとして使う場合
-  module.exports = PHPNako
-}
+const phpnako = new PHPNako()
+phpnako.execCommand()

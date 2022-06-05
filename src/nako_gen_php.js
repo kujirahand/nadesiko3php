@@ -3,11 +3,9 @@
  * パーサーが生成した中間オブジェクトを実際のPHPのコードに変換する。
  */
 
-'use strict'
-
-const { NakoSyntaxError, NakoError, NakoRuntimeError } = require('nadesiko3/src/nako_errors.js')
-const nakoVersion = require('nadesiko3/src/nako_version.js')
-const NakoGen = require('nadesiko3/src/nako_gen.js')
+import { NakoSyntaxError, NakoError, NakoRuntimeError } from 'nadesiko3/core/src/nako_errors.mjs'
+import nakoVersion from 'nadesiko3/src/nako_version.mjs'
+import { NakoGen } from 'nadesiko3/core/src/nako_gen.mjs'
 
 /**
  * @typedef {import("./nako3").Ast} Ast
@@ -15,7 +13,7 @@ const NakoGen = require('nadesiko3/src/nako_gen.js')
 /**
  * 構文木からJSのコードを生成するクラス
  */
-class NakoGenPHP {
+export class NakoGenPHP {
   /**
    * @param {import('./nako3')} com
    * @param {Ast} ast
@@ -528,6 +526,7 @@ class NakoGenPHP {
   convRequire (mod) {
     return `
     // <require_once src="${mod}">
+    // 取り込むファイルのパスを解決
     $mod_file = __DIR__.'/src/${mod}.php';
     if (defined('PHPNAKO_RUNTIME_PATH')) {
       $mod_file = PHPNAKO_RUNTIME_PATH.'/${mod}.php';
@@ -539,6 +538,8 @@ class NakoGenPHP {
         if ($v['type'] == 'func') { $__v0[$name] = $v['fn']; }
         else { $__v0[$name] = $v['value']; }
       }
+      // 初期化メソッドを実行
+      if (!empty($exports['初期化'])) { $exports['初期化']['fn']($nako3); }
     }
     // </require_once>
     `
@@ -1244,5 +1245,3 @@ class NakoGenPHP {
       `${errBlock}}\n`
   }
 }
-
-module.exports = NakoGenPHP
