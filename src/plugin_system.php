@@ -5,6 +5,12 @@
 global $nako3;
 if (!isset($nako3)) { $nako3['version'] = '3.0.0'; }
 $exports = [
+  '初期化' => [
+    'type' => 'func',
+    'josi' => [],
+    'fn' => function($sys) {
+    },
+  ],
   // @ システム定数
   'ナデシコバージョン' => ['type'=>'const', 'value' => $nako3['version']], // @なでしこばーじょん
   'ナデシコエンジン'=>['type'=>'const', 'value'=>'nadesi.com/v3'], // @なでしこえんじん
@@ -1493,8 +1499,9 @@ $exports = [
     'josi' => [['の']],
     'fn' => function($s) {
       $t = strtotime($s);
-      $no = date('w');
-      return ['日','月','火', '水', '木', '金', '土'][$no];
+      $no = intval(date('w', $t));
+      $weekName = ['日','月','火', '水', '木', '金', '土'];
+      return $weekName[$no % 7];
     },
   ],
   '曜日番号取得'=> [ // @Sに指定した日付の曜日番号をで返す。不正な日付の場合は今日の曜日番号を返す。(0=日/1=月/2=火/3=水/4=木/5=金/6=土) // @ようびばんごうしゅとく
@@ -1778,10 +1785,16 @@ $exports = [
 // なでしこの変数関数を得る
 function nako3_findVar($name) {
   global $nako3;
+  if (empty($nako3['__varslist'])) { return null; }
   $__varslist = $nako3['__varslist'];
+  $modName = isset($nako3['modName']) ? $nako3['modName'] : 'main';
+  $name2 = $modName.'__'.$name;
   for ($i = count($__varslist) - 1; $i >= 0; $i--) {
     $vars = $__varslist[$i];
-    if (isset($vars[$name])) {return $vars[$name];}
+    // local
+    if (isset($vars[$name2])) { return $vars[$name2]; }
+    // global
+    if (isset($vars[$name])) { return $vars[$name]; }
   }
   return null;
 }

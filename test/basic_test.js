@@ -1,24 +1,27 @@
-const assert = require('assert')
-const PHPNako = require('../src/phpnako.js')
-const NakoGenPHP = require('../src/nako_gen_php.js')
-const fs = require('fs')
-const path = require('path')
-const { execSync } = require('child_process');
-const iconv = require('iconv-lite')
+import assert from 'assert'
+import { PHPNako } from '../src/phpnako_mod.js'
+import path from 'path'
+import { execSync } from 'child_process'
+import iconv from 'iconv-lite'
+import url from 'url'
+import fs from 'fs'
+const __filename = url.fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 describe('php_basic_test', () => {
-  const nako = new PHPNako()
   const cmp = (/** @type {string} */code, /** @type {string} */res) => {
+    const nako = new PHPNako()
     code = '!"PHP"にモード設定\n' + code
     nako.logger.debug('code=' + code)
     const phpfile = path.join(__dirname, 'tmp.php')
-    const txtfile = path.join(__dirname, 'tmp.txt')
+    const nako3file = path.join(__dirname, 'tmp.nako3')
     const opt = {
-      'filename': path.join(__dirname, 'tmp.nako3'),
+      'mainfile': nako3file,
       'output': phpfile,
       'run': false
     }
-    nako.nakoCompile(opt, code, false)
+    fs.writeFileSync(nako3file, code, 'utf-8')
+    nako.execMainfile(opt)
     const data = execSync(`php "${phpfile}"`)
     const txt = iconv.decode(data, 'utf-8').replace(/\s+$/, '')
     assert.strictEqual(txt, res)

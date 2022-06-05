@@ -3,6 +3,7 @@
  * パーサーが生成した中間オブジェクトを実際のPHPのコードに変換する。
  */
 
+import path from 'path'
 import { NakoSyntaxError, NakoError, NakoRuntimeError } from 'nadesiko3/core/src/nako_errors.mjs'
 import nakoVersion from 'nadesiko3/src/nako_version.mjs'
 import { NakoGen } from 'nadesiko3/core/src/nako_gen.mjs'
@@ -36,9 +37,10 @@ export class NakoGenPHP {
       // TODO: テストコード
       // php += '\n__self._runTests(__tests);\n'
     }
+    const modName = path.basename(com.filename).replace(/\.[a-z0-9]+$/, '')
     const code = `<?php
     //-----------------------------------------------
-    // 【なでしこ3PHP】自動生成されたコード
+    // 【なでしこ3PHP】「${com.filename}」から自動生成されたコード
     //-----------------------------------------------
     // global 設定
     global $nako3, $__v0, $__v1, $__v2, $__locals;
@@ -49,6 +51,7 @@ export class NakoGenPHP {
         '__varslist'=> [[], [], []], // 変数リスト
         '__module' => [], // モジュールデータ
         '__genMode' => 'PHP',
+        'modName' => '${modName}',
       ];
       // alias
       $__v0 = &$nako3['__varslist'][0]; // system
@@ -69,6 +72,7 @@ export class NakoGenPHP {
     ${head}
     // パスなどの設定
     $__v0['母艦パス'] = __DIR__;
+    $nako3['modName'] = '${modName}';
     //-----------------------------------------------
     // 変換コード
     try {
