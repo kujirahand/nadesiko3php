@@ -1134,7 +1134,9 @@ export class NakoGenPHP {
       'or': '||',
       'shift_l': '<<',
       'shift_r': '>>',
-      'shift_r0': '>>>'
+      'shift_r0': '>>>',
+      '÷': '/',
+      '×': '*',
     }
     let op = node.operator // 演算子
     let right = this._convGen(node.right, true)
