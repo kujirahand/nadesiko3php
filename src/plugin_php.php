@@ -189,7 +189,7 @@ $exports = [
       return htmlspecialchars($s, ENT_QUOTES);
     },
   ],
-  'HTML埋込'=> [ // @文字列Sの中に辞書型データDICの値を埋め込んで返す。書式は「xxx[[変数名]]xx」のように書く。展開時に安全にHTML変換する。変換したくないものには[[変数名|raw]]と書く。または[[変数名|書式]]を記述(書式はsprintfかdate/time/datetime)。// @HTMLうめこむ
+  'HTML埋込'=> [ // @文字列Sの中に辞書型データDICの値を埋め込んで返す。書式は「xxx[[変数名]]xx」のように書く。展開時に安全にHTML変換する。変換したくないものには[[変数名|raw]]と書く。改行を変換したい場合は[[変数名|br]]と書く。または[[変数名|書式]]を記述(書式はsprintfかdate/time/datetime)。// @HTMLうめこむ
     'type' => 'func',
     'josi' => [['に','へ'],['を']],
     'fn' => function($s, $dic) {
@@ -197,12 +197,15 @@ $exports = [
       return preg_replace_callback('#\[\[(.*?)\]\]#', function($m)use($dic) {
         $key = $m[1];
         $raw = FALSE;
+        $br = FALSE;
         $fmt = '';
         if (strpos($key, '|') !== FALSE) {
           if (preg_match('#\s*(.+?)\s*\|\s*([%a-zA-Z0-9_]+)#', $key, $m)) {
             $key = $m[1];
             if ($m[2] == 'raw') {
               $raw = TRUE;
+            } else if ($m[2] == 'br') {
+              $br = TRUE;
             } else {
               $fmt = $m[2];
             }
@@ -220,6 +223,9 @@ $exports = [
             $val = sprintf($fmt, $val);
           }
           $val = htmlspecialchars($val, ENT_QUOTES);
+          if ($br) {
+            $val = str_replace("\n", '<br>', $val);
+          }
         }
         return $val;
       }, $subject);
