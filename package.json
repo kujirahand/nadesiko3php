@@ -1,6 +1,6 @@
 {
   "name": "nadesiko3php",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "Japanese Programming Language \"Nadesiko3\" with PHP ",
   "main": "phpnako.js",
   "type": "module",
