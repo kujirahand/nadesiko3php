@@ -33,6 +33,15 @@ $exports = [
     },
     'return_none' => TRUE,
   ],
+  'PHP関数実行'=> [ // @PHPの関数Fを引数ARGSで実行する。 // @PHPかんすうじっこう
+    'type' => 'func',
+    'josi' => [['を'], ['で', 'にて']],
+    'fn' => function($f, $args) {
+      if (!is_array($args)) { $args = [$args]; }
+      return call_user_func_array($f, $args);
+    },
+    'return_none' => FALSE,
+  ],
   'セッション開始'=> [ // @PHPセッションを開始する。 // @せっしょんかいし
     'type' => 'func',
     'josi' => [],

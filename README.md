@@ -102,6 +102,11 @@ $ phpnako -e "1+2×3を表示。"
  - [plugin_node](https://nadesi.com/v3/doc/index.php?plugin_node&show)
  - [plugin_php](https://github.com/kujirahand/nadesiko3php/blob/main/src/plugin_php.php)
 
+# プラグインの作り方
+
+- (1) プラグインを作ります。[plugin_php.php](src/plugin_php.php)が参考になります。
+- (2) PHPプログラムから自動的に関数定義をJSONでエクスポートします。`cd src && php convert_php2json.php`を実行します。
+
 
 
 
