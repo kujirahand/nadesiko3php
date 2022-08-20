@@ -231,4 +231,172 @@ $exports = [
       }, $subject);
     },
   ],
+  // @KUDB
+  'KUDB接続'=> [ // @簡易ドキュメントデータベースKUDBに接続する。DBにはファイルパスを指定する。 // @　KUDBせつぞく
+    'type' => 'func',
+    'josi' => [['に','へ','の']],
+    'fn' => function($dbfile) {
+      global $__v0, $__kudb, $__kudb_cache;
+      // check db cache
+      if (empty($__kudb_cache)) { $__kudb_cache = []; }
+      if (!empty($__kudb_cache[$dbfile])) {
+        $__kudb = $__kudb_cache[$dbfile];
+        return $__kudb;
+      }
+      // open db
+      $db = new PDO("sqlite:$dbfile");
+      $__kudb_cache[$dbfile] = $db;
+      $__kudb = $db;
+      $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+      $db->exec('
+        CREATE TABLE IF NOT EXISTS kudb (
+          id INTEGER PRIMARY KEY,
+          doc TEXT DEFAULT "",
+          tag TEXT DEFAULT "",
+          ctime INTEGER DEFAULT 0,
+          mtime INTEGER DEFAULT 0
+        )');
+      $db->exec('
+        CREATE TABLE IF NOT EXISTS kudb_params (
+          id INTEGER PRIMARY KEY,
+          key TEXT DEFAULT "",
+          value TEXT DEFAULT ""
+        )');
+      return $db;
+    },
+  ],
+  'KUDB全取得'=> [ // @KUDBに挿入したドキュメントを全部返す // @KUDBぜんしゅとく
+    'type' => 'func',
+    'josi' => [],
+    'fn' => function() {
+      global $__kudb;
+      if (empty($__kudb)) { throw new Exception('最初に『KUDB接続』で接続してください。'); }
+      $sql = "SELECT * FROM kudb";
+      $st = $__kudb->prepare($sql);
+      $st->execute([]);
+      $result = [];
+      foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $id = $row['id'];
+        $v = json_decode($row['doc'], TRUE);
+        if (is_array($v)) { $v['_id'] = $id; }
+        $result[] = $v;
+      }
+      return $result;
+    },
+  ],
+  'KUDB部分取得'=> [ // @KUDBの(0起点)INDEXからCOUNT件だけ取得 // @KUDBぶぶんしゅとく
+    'type' => 'func',
+    'josi' => [['から'],['だけ','を']],
+    'fn' => function($index, $count) {
+      global $__kudb;
+      if (empty($__kudb)) { throw new Exception('最初に『KUDB接続』で接続してください。'); }
+      $sql = "SELECT * FROM kudb LIMIT ? OFFSET ?";
+      $st = $__kudb->prepare($sql);
+      $st->execute([$count, $index]);
+      $result = [];
+      foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $id = $row['id'];
+        $v = json_decode($row['doc'], TRUE);
+        if (is_array($v)) { $v['_id'] = $id; }
+        $result[] = $v;
+      }
+      return $result;
+    },
+  ],
+  'KUDB末尾取得'=> [ // @KUDBの(0起点)末尾から数えてINDEXからCOUNT件取得 // @KUDBまつびしゅとく
+    'type' => 'func',
+    'josi' => [['から'],['だけ','を']],
+    'fn' => function($index, $count) {
+      global $__kudb;
+      if (empty($__kudb)) { throw new Exception('最初に『KUDB接続』で接続してください。'); }
+      $sql = "SELECT * FROM kudb ORDER BY id DESC LIMIT ? OFFSET ?";
+      $st = $__kudb->prepare($sql);
+      $st->execute([$count, $index]);
+      $result = [];
+      foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $id = $row['id'];
+        $v = json_decode($row['doc'], TRUE);
+        if (is_array($v)) { $v['_id'] = $id; }
+        $result[] = $v;
+      }
+      return $result;
+    },
+  ],
+  'KUDB挿入'=> [ // @KUDBにオブジェクトVを挿入する(TAGプロパティを指定すると検索などに使える) // @KUDBそうにゅう
+    'type' => 'func',
+    'josi' => [['を']],
+    'fn' => function($v) {
+      global $__kudb;
+      if (empty($__kudb)) { throw new Exception('最初に『KUDB接続』で接続してください。'); }
+      $tag = empty($v['TAG']) ? '' : $v['TAG'];
+      $sql = "INSERT INTO kudb (tag, doc, ctime, mtime) VALUES (?,?,?,?)";
+      $st = $__kudb->prepare($sql);
+      $st->execute([$tag, json_encode($v,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES), time(), time()]);
+      return $__kudb->lastInsertId();
+    },
+  ],
+  'KUDB更新'=> [ // @KUDBのIDをVに更新 // @KUDBこうしん
+    'type' => 'func',
+    'josi' => [['を'], ['に','へ']],
+    'fn' => function($id, $v) {
+      global $__kudb;
+      if (empty($__kudb)) { throw new Exception('最初に『KUDB接続』で接続してください。'); }
+      $sql = "UPDATE kudb SET tag=?, doc=?, mtime=? WHERE id=?";
+      $tag = empty($v['tag']) ? '' : $v['tag'];
+      $st = $__kudb->prepare($sql);
+      return $st->execute([$tag, json_encode($v,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES), time(), $id]);
+    },
+  ],
+  'KUDB削除'=> [ // @KUDBのIDを削除する // @KUDBさくじょ
+    'type' => 'func',
+    'josi' => [['を']],
+    'fn' => function($id) {
+      global $__kudb;
+      if (empty($__kudb)) { throw new Exception('最初に『KUDB接続』で接続してください。'); }
+      $sql = "DELETE FROM kudb WHERE id = ?";
+      $st = $__kudb->prepare($sql);
+      return $st->execute([$id]);
+    },
+  ],
+  'KUDBタグ検索'=> [ // @KUDBでデータ一覧からTAGプロパティを検索する // @KUDBたぐけんさく
+    'type' => 'func',
+    'josi' => [['の', 'を']],
+    'fn' => function($tag) {
+      global $__kudb;
+      if (empty($__kudb)) { throw new Exception('最初に『KUDB接続』で接続してください。'); }
+      $sql = "SELECT * FROM kudb WHERE tag=?";
+      $st = $__kudb->prepare($sql);
+      $st->execute([$tag]);
+      $result = [];
+      foreach ($st->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $id = $row['id'];
+        $v = json_decode($row['doc'], TRUE);
+        if (is_array($v)) { $v['_id'] = $id; }
+        $result[] = $v;
+      }
+      return $result;
+    },
+  ],
+  'KUDBタグ削除'=> [ // @KUDBでTAGを指定して削除 // @KUDBたぐさくじょ
+    'type' => 'func',
+    'josi' => [['の', 'を']],
+    'fn' => function($tag) {
+      global $__kudb;
+      if (empty($__kudb)) { throw new Exception('最初に『KUDB接続』で接続してください。'); }
+      $sql = "DELETE FROM kudb WHERE tag=?";
+      $st = $__kudb->prepare($sql);
+      return $st->execute([$tag]);
+    },
+  ],
+  'KUDBタグ更新'=> [ // @KUDBで指定TAGの内容をVに更新 // @KUDBたぐこうしん
+    'type' => 'func',
+    'josi' => [['を'], ['に','へ']],
+    'fn' => function($tag, $v) {
+      global $__kudb;
+      if (empty($__kudb)) { throw new Exception('最初に『KUDB接続』で接続してください。'); }
+      $sql = "UPDATE kudb SET doc=?, mtime=? WHERE tag=?";
+      $st = $__kudb->prepare($sql);
+      return $st->execute([json_encode($v,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES), time(), $tag]);
+    },
+  ],
 ];
