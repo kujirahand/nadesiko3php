@@ -3,10 +3,12 @@
 日本語プログラミング言語「なでしこ」をPHPで動かすプロジェクト。
 サーバーでの利用を想定しています。
 
-- [なでしこ3PHPに関する詳しい説明](https://nadesi.com/doc3/index.php?nadesiko3php) 
+- [「なでしこ3」のWEBサイト](https://nadesi.com/)
+  - [なでしこ3PHPに関する詳しい説明](https://nadesi.com/doc3/index.php?nadesiko3php) 
   - [開発「なでしこ3」のリポジトリ](https://github.com/kujirahand/nadesiko3)
     - [利用サンプル](https://github.com/kujirahand/phpnako-exampe-bbs/)
-- [「なでしこ3」のWEBサイト](https://nadesi.com/)
+
+使い方を確認するには、[利用サンプル](https://github.com/kujirahand/phpnako-exampe-bbs/) を確認すると良いでしょう。
 
 
 ## これは何？
@@ -15,16 +17,17 @@
 
 ## 動作原理
 
-なでしこ3PHPの仕組みですが、なでしこ3のプログラムをPHPのプログラムに変換します。
+なでしこ3PHPの仕組みですが、なでしこ3のプログラムをPHPのプログラムに変換して実行します。
 
-もともと、なでしこ3では、なでしこのプログラムを、抽象木構文(AST)に変換し、それを元にしてJavaScriptを出力しています。そこで、このプロジェクトでは抽象木構文(AST)からPHPのプログラムを出力します。
+もともと、オリジナルの「なでしこ3」では、なでしこのプログラムを、抽象木構文(AST)に変換して、それを元にしてJavaScriptを出力しています。
+そこで、このプロジェクトでは抽象木構文(AST)からPHPのプログラムを出力します。
 
  - なでしこ3 → AST → JavaScript (なでしこ3オリジナル)
  - なでしこ3 → AST → PHP (なでしこ3PHP)
 
 ## 実行に必要なツール
 
-なでしこ3エンジンコアは、Node.jsで開発されています。
+なでしこ3エンジンのコアは、Node.jsで開発されています。
 そのため、実行には[PHP7以上](https://www.php.net/)と[Node.js](https://nodejs.org)が必要です。
 
 ## Windowsでなでしこ3PHPをインストールする方法
@@ -40,15 +43,15 @@
 
 npmを使ってインストールする場合:
 
-```
-$ npm -g install nadesiko3php
+```sh
+npm -g install nadesiko3php
 ```
 
 リポジトリから取得する場合:
 
-```
-$ git clone https://github.com/kujirahand/nadesiko3php.git
-$ npm install
+```sh
+git clone https://github.com/kujirahand/nadesiko3php.git
+npm install
 ```
 
 リポジトリから取得した場合は、`npm bin`のディレクトリにパスを通してください。
@@ -58,23 +61,24 @@ $ npm install
 
 コマンドラインで以下のようなコマンドを実行すると「(プログラム).php」というファイル(およびなでしこ3ランタイムが入ったsrcフォルダ)が作成されます。
 
-```
-$ phpnako -c (プログラム).nako3
+```sh
+phpnako -c (プログラム).nako3
 ```
 
 ## 監視モード（即時自動コンパイル）で効率アップ
 
 あるいは作業しているフォルダに対して監視を行って、「.nako3」ファイルが更新されたら自動的にコンパイルするように指定できます。
 
-```
-$ cd (作業対象のパス)
-$ phpnako --watch
+```sh
+cd (作業対象のパス)
+phpnako --watch
 ```
 
 なおPHPのサーバーモードを使えば、なでしこPHPとPHPだけで開発が可能です。以下のコマンドでPHPのサーバーが起動します。その後、ブラウザで「[http://localhost:8888](http://localhost:8888)」へアクセスすると実行結果を確認できます。
 
-```
-$ php -S 0.0.0.0:8888 -c php.ini
+```sh
+# PHPのローカルサーバーを利用する場合
+php -S localhost:8888 -c php.ini
 ```
 
 ### レンタルサーバーなどにアップして動かす場合
@@ -86,12 +90,14 @@ $ php -S 0.0.0.0:8888 -c php.ini
 
 なお、普通にコマンドラインでPHPを使いたい場合は、以下のように記述してプログラムを即時実行できます。Node.js版のcnako3でも同じように実行できますが、PHP版も意外と便利かも。
 
-```
+```sh
 # 普通にプログラムを即時実行
-$ phpnako (プログラム).nako3
+phpnako (プログラム).nako3
+```
 
+```sh
 # ワンライナーでコマンドラインでプログラムを指定して実行
-$ phpnako -e "1+2×3を表示。"
+phpnako -e "1+2×3を表示。"
 ```
 
 # 利用できる命令
