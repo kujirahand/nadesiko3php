@@ -123,7 +123,3 @@ phpnako -e "1+2×3を表示。"
 - (1) プラグインを作ります。[plugin_php.php](src/plugin_php.php)が参考になります。
 - (2) PHPプログラムから自動的に関数定義をJSONでエクスポートします。`cd src && php convert_php2json.php`を実行します。
 
-
-
-
-

@@ -970,7 +970,7 @@ $exports = [
     'type' => 'func',
     'josi' => [['の'], ['に', 'へ'], ['を']],
     'fn' => function(&$a, $i, $b) {
-      return array_splice($a, $i, 0, $s);
+      return array_splice($a, $i, 0, $b);
     },
   ],
   '配列ソート'=> [ // @配列Aをソートして返す(A自体を変更) // @はいれつそーと
@@ -1660,7 +1660,7 @@ $exports = [
       return date('H:i:s', $t);
     },
   ],
-  '日付加算'=> [ // @返す。 // @ひづけかさん
+  '日付加算'=> [ // @時間SにAを加えて返す。 // @ひづけかさん
     'type' => 'func',
     'josi' => [['に'],['を']],
     'fn' => function($s, $a) {
@@ -1671,7 +1671,7 @@ $exports = [
       if ($flag == '-') { $a = substr($a, 1); $sign = '-'; }
       list($ya,$ma,$da) = explode('/', $a.'///');
       $res = strtotime("{$sign}{$ya} years {$ma} month {$da} days", $ts); 
-      return date('H:i:s', $res);
+      return date('Y/m/d', $res);
     },
   ],
   '日時加算'=> [ // @返す。 // @にちじかさん
